@@ -85,6 +85,27 @@ function createVideoElement(videoPath) {
     video.playsInline = true;
     video.preload = 'auto';
     video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('autoplay', '');
+    video.setAttribute('loop', '');
+    
+    // Function to attempt playing the video (important for mobile)
+    const attemptPlay = () => {
+        if (video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Autoplay was prevented - this is normal on some mobile browsers
+                    // Video will play when user interacts or when it comes into view via IntersectionObserver
+                });
+            }
+        }
+    };
+    
+    // Try to play when video metadata is loaded (helps with mobile autoplay)
+    video.addEventListener('loadedmetadata', attemptPlay);
+    video.addEventListener('canplay', attemptPlay);
+    video.addEventListener('loadeddata', attemptPlay);
     
     // Handle video load errors gracefully
     video.addEventListener('error', () => {
@@ -276,6 +297,51 @@ function renderModels(models) {
         
         modelsGrid.appendChild(categoryGrid);
     });
+    
+    // Setup Intersection Observer for video autoplay on mobile
+    setupVideoAutoplay();
+}
+
+/**
+ * Setup Intersection Observer to play videos when they come into view
+ * This is especially important for mobile browsers which restrict autoplay
+ */
+function setupVideoAutoplay() {
+    const videos = document.querySelectorAll('.video-container video');
+    
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    // Video is in viewport, try to play (critical for mobile)
+                    const playPromise = video.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            // Autoplay prevented, will try again on user interaction
+                        });
+                    }
+                } else {
+                    // Video is out of viewport, pause to save resources
+                    video.pause();
+                }
+            });
+        }, {
+            rootMargin: '50px' // Start loading slightly before video enters viewport
+        });
+        
+        videos.forEach(video => {
+            observer.observe(video);
+        });
+    } else {
+        // Fallback for browsers without IntersectionObserver
+        videos.forEach(video => {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {});
+            }
+        });
+    }
 }
 
 /**
