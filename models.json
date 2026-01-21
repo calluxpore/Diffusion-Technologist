@@ -1,0 +1,422 @@
+[
+  {
+    "name": "10 Print X Algorithm",
+    "slug": "10 Print X Algorithm",
+    "category": "Typography & Digital",
+    "civitaiUrl": "https://civitai.com/models/808296/10print-x-algorithm-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Alien X Dravuun",
+    "slug": "Alien X Dravuun",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1434511/alien-x-dravuun-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Alien X Zynthar",
+    "slug": "Alien X Zynthar",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1428511/alien-x-zynthar-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Amazon",
+    "slug": "Amazon",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2248937/amazon",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Anime Style Variant",
+    "slug": "Anime Style Variant",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2214415/anime-style-variant",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Architecture X 3D Houses",
+    "slug": "Architecture X 3D houses",
+    "category": "Architecture",
+    "civitaiUrl": "https://civitai.com/models/808320/architecture-x-3dhouses-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Architecture X Style",
+    "slug": "Architecture X Style",
+    "category": "Architecture",
+    "civitaiUrl": "https://civitai.com/models/808349/architecture-x-style-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Art Nouveau Graffiti",
+    "slug": "Art Nouveau X Graffiti",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/597855/art-nouveau-graffiti-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Atompunk Minimal",
+    "slug": "Atompunk X Minimal",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/597868/atompunk-minimal-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Avant Garde X Tribalism",
+    "slug": "Avant Garde X Tribalism",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/808403/avant-garde-x-tribalism-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Bauhaus",
+    "slug": "Bahaus",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/594674/bauhaus-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Bird X Human",
+    "slug": "Bird X Human",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1603227/bird-x-human-flux-lora",
+    "tags": ["Flux"]
+  },
+  {
+    "name": "Brown Anime Portrait",
+    "slug": "Brown Anime Portrait",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2192521/brown-anime-portrait",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Brown Bob Portrait",
+    "slug": "Brown Bob Portrait",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/2152722/brown-bob-portrait",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Captain X Feline",
+    "slug": "Captain Feline",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1498502/captain-x-feline-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Cleopatra",
+    "slug": "Cleopatra",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1438083/cleopatra-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Clown",
+    "slug": "Clown",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1481288/clown-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Color X Fashion",
+    "slug": "Color X Fashion",
+    "category": "Fashion",
+    "civitaiUrl": "https://civitai.com/models/601801/color-x-fashion-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Comic Glasses",
+    "slug": "Comic Glasses",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/2078709/comic-glasses",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Red X Cosmonaut",
+    "slug": "Cosmonaut",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1480597/red-x-cosmonaut-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Cyberpunk X Robot",
+    "slug": "Cyberpunk X Robot",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1647586/cyberpunk-x-robot",
+    "tags": ["Flux"]
+  },
+  {
+    "name": "Devanagari X Graffiti",
+    "slug": "Devanagri X Graffiti",
+    "category": "Typography & Digital",
+    "civitaiUrl": "https://civitai.com/models/1233553/devanagari-x-graffiti",
+    "tags": ["SDXL", "Flux"]
+  },
+  {
+    "name": "Exclusion",
+    "slug": "Exclusion",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/593259/exclusion-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Fantasy City",
+    "slug": "Fantasy City",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1643746/fantasy-city",
+    "tags": ["SDXL", "Flux"]
+  },
+  {
+    "name": "Blue Stripes X Fire Force",
+    "slug": "Fire Force",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1582060/blue-stripes-x-fire-force-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Freedom X Type",
+    "slug": "Freedom X Type",
+    "category": "Typography & Digital",
+    "civitaiUrl": "https://civitai.com/models/1458191/freedom-x-type-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Future Fashion",
+    "slug": "Future Fashion",
+    "category": "Fashion",
+    "civitaiUrl": "https://civitai.com/models/2244760/future-fashion",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Gouache",
+    "slug": "Gouache",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/593225/gouache-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Hades",
+    "slug": "Hades",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1456040/hades-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Halftone Punk",
+    "slug": "Halftone Punk",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/593243/halftone-punk",
+    "tags": ["SD1", "Flux"]
+  },
+  {
+    "name": "High Fashion",
+    "slug": "High Fashion",
+    "category": "Fashion",
+    "civitaiUrl": "https://civitai.com/models/1540202/high-fashion-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Impasto",
+    "slug": "Impasto",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/2259570/impasto",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Industrial Design X Marker Rendering",
+    "slug": "Industrial Design X Marker Rendering",
+    "category": "Industrial Design",
+    "civitaiUrl": "https://civitai.com/models/808366/industrial-design-x-marker-rendering",
+    "tags": ["ZImage Turbo", "Flux", "SD1"]
+  },
+  {
+    "name": "Industrial Design X Sketch",
+    "slug": "Industrial Design X Sketch",
+    "category": "Industrial Design",
+    "civitaiUrl": "https://civitai.com/models/808393/industrial-design-x-sketch-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Line Draw",
+    "slug": "Line Draw",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/593267/line-draw-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Mannequin",
+    "slug": "Mannequin",
+    "category": "Fashion",
+    "civitaiUrl": "https://civitai.com/models/601882/mannequin-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Metal X Mouse",
+    "slug": "Metal X Mouse",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1178594/metal-x-mouse-xl-lora",
+    "tags": ["SDXL"]
+  },
+  {
+    "name": "Monkey King",
+    "slug": "Monkey King",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1653279/monkey-king",
+    "tags": ["SDXL", "Flux"]
+  },
+  {
+    "name": "Naga Futures",
+    "slug": "Naga Futures",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2256044/naga-futures",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Neon X Drive",
+    "slug": "Neon X Drive",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1207829/neon-x-drive-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Polka X Glasses",
+    "slug": "Polka X Glasses",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1471578/polka-x-glasses-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Popart",
+    "slug": "Popart",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/596728/popart-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Portraits X Flat Style",
+    "slug": "Portrait X Flat Style",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/808333/portraits-x-flat-style-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Red Sun",
+    "slug": "Red Sun",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1503354/red-sun",
+    "tags": ["SD1", "Flux"]
+  },
+  {
+    "name": "Retro X Futurism",
+    "slug": "Retro X Futurism",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/808446/retro-x-futurism-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Robot Illustration",
+    "slug": "Robot Illustration",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2226000/robot-illustration",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Sherpa",
+    "slug": "Sherpa",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/2262211/sherpa",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Smoke X Sketch",
+    "slug": "Smoke X Sketch",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/808457/smoke-x-sketch-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Space Marine",
+    "slug": "Space Marine",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2251241/space-marine",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Spaceman",
+    "slug": "Spaceman",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1494603/spaceman-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Spider Gwen",
+    "slug": "Spider Gwen",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/2251592/spider-gwen",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Steampunk X Skull Mask",
+    "slug": "Steampunk X Skull",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/1389717/steampunk-x-skull-mask",
+    "tags": ["SD1", "Flux"]
+  },
+  {
+    "name": "Suprematism X Style",
+    "slug": "Suprematism X Style",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/808307/suprematism-x-style-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Surrealism",
+    "slug": "Surrealism",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/593213/surrealism-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Swiss X Abstract",
+    "slug": "Swiss X Abstract",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/808276/swiss-x-abstract-lora",
+    "tags": ["SD1"]
+  },
+  {
+    "name": "Templar",
+    "slug": "Templar",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1585101/templar-flux-lora",
+    "tags": ["Flux"]
+  },
+  {
+    "name": "Varang",
+    "slug": "Varang",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/2249804/varang",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Warrior X Monk",
+    "slug": "Warrior X Monk",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/1182107/warrior-x-monk-xl-lora",
+    "tags": ["SDXL"]
+  },
+  {
+    "name": "Whimsical",
+    "slug": "Whimsical",
+    "category": "Architecture",
+    "civitaiUrl": "https://civitai.com/models/2269821/whimsical",
+    "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "White X Black Hair",
+    "slug": "White X Black Hair",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.com/models/1140599/white-x-black-hair-flux-lora",
+    "tags": ["Flux"]
+  }
+]
