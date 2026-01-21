@@ -115,22 +115,22 @@ body {
 
 .hero-title {
     font-size: 5.5rem;
-    font-weight: 400;
+    font-weight: 500;
     color: var(--text-primary);
     line-height: 1.05;
     letter-spacing: -0.04em;
     margin: 0;
-    font-family: inherit;
+    font-family: 'Inter Tight', sans-serif;
 }
 
 .hero-subtitle {
     font-size: 1.05rem;
     line-height: 1.5;
     color: var(--text-secondary);
-    font-weight: 700;
+    font-weight: 500;
     margin-top: 0.75rem;
     margin-left: 6.5rem;
-    font-family: inherit;
+    font-family: 'Inter Tight', sans-serif;
 }
 
 .hero-description {
