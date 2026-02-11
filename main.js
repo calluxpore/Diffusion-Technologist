@@ -267,6 +267,7 @@ function renderModels(models) {
     
     // Category icons mapping
     const categoryIcons = {
+        'Most Recent Models': '🎉',
         'Character & Portraits': '👤',
         'Fashion': '👗',
         'Art Styles & Techniques': '🎨',
@@ -276,6 +277,25 @@ function renderModels(models) {
         'Architecture': '🏛️',
         'Typography & Digital': '🔤'
     };
+
+    // Most Recent Models section: Paper Warframe, Whimsical, Impasto, Naga Futures
+    const paperWarframe = { name: 'Paper Warframe', slug: 'Paper Warframe', tags: ['ZImage', 'ZImage Turbo', 'Flux'], civitaiUrl: 'https://civitai.com/models/2382885?modelVersionId=2679665' };
+    const whimsical = models.find(m => m.name === 'Whimsical');
+    const impasto = models.find(m => m.name === 'Impasto');
+    const nagaFutures = models.find(m => m.name === 'Naga Futures');
+    const mostRecent = [paperWarframe, whimsical, impasto, nagaFutures].filter(Boolean);
+    if (mostRecent.length > 0) {
+        const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
+        modelsGrid.appendChild(recentHeader);
+        const recentGrid = document.createElement('div');
+        recentGrid.className = 'category-grid';
+        mostRecent.forEach((model, index) => {
+            const card = createModelCard(model);
+            card.style.animationDelay = `${index * 0.05}s`;
+            recentGrid.appendChild(card);
+        });
+        modelsGrid.appendChild(recentGrid);
+    }
     
     // Render each category
     Object.keys(categories).sort().forEach(categoryName => {
@@ -370,6 +390,7 @@ function renderCategoryButtons(models) {
     
     // Category icons mapping
     const categoryIcons = {
+        'Most Recent Models': '🎉',
         'Character & Portraits': '👤',
         'Fashion': '👗',
         'Art Styles & Techniques': '🎨',
@@ -379,7 +400,11 @@ function renderCategoryButtons(models) {
         'Architecture': '🏛️',
         'Typography & Digital': '🔤'
     };
-    
+
+    // Add "Most Recent Models" button first
+    const mostRecentButton = createCategoryButton('Most Recent Models', categoryIcons['Most Recent Models']);
+    categoryButtonsContainer.appendChild(mostRecentButton);
+
     // Create buttons for each category
     Array.from(categories).sort().forEach(categoryName => {
         const button = createCategoryButton(categoryName, categoryIcons[categoryName] || '📁');

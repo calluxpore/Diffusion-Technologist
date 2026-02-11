@@ -280,6 +280,13 @@
     "tags": ["SD1"]
   },
   {
+    "name": "Paper Warframe",
+    "slug": "Paper Warframe",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2382885?modelVersionId=2679665",
+    "tags": ["ZImage", "ZImage Turbo", "Flux"]
+  },
+  {
     "name": "Polka X Glasses",
     "slug": "Polka X Glasses",
     "category": "Character & Portraits",
