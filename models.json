@@ -231,6 +231,13 @@
     "tags": ["ZImage Turbo", "Flux", "SD1"]
   },
   {
+    "name": "Journal Sketching",
+    "slug": "Journal Sketching",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/2420808",
+    "tags": ["ZImage Turbo"]
+  },
+  {
     "name": "Industrial Design X Sketch",
     "slug": "Industrial Design X Sketch",
     "category": "Industrial Design",

@@ -278,12 +278,12 @@ function renderModels(models) {
         'Typography & Digital': '🔤'
     };
 
-    // Most Recent Models section: Paper Warframe, Whimsical, Impasto, Naga Futures
+    // Most Recent Models section: Journal Sketching, Paper Warframe, Whimsical, Impasto
+    const journalSketching = models.find(m => m.name === 'Journal Sketching');
     const paperWarframe = { name: 'Paper Warframe', slug: 'Paper Warframe', tags: ['ZImage', 'ZImage Turbo', 'Flux'], civitaiUrl: 'https://civitai.com/models/2382885?modelVersionId=2679665' };
     const whimsical = models.find(m => m.name === 'Whimsical');
     const impasto = models.find(m => m.name === 'Impasto');
-    const nagaFutures = models.find(m => m.name === 'Naga Futures');
-    const mostRecent = [paperWarframe, whimsical, impasto, nagaFutures].filter(Boolean);
+    const mostRecent = [journalSketching, paperWarframe, whimsical, impasto].filter(Boolean);
     if (mostRecent.length > 0) {
         const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
         modelsGrid.appendChild(recentHeader);
