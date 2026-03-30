@@ -59,12 +59,16 @@ body {
     transition: opacity 0.2s;
     font-family: inherit;
     display: inline-flex;
-    align-items: baseline;
-    gap: 0.2em;
+    align-items: center;
+    gap: 0.35em;
 }
 
 .nav-mark {
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 1.2em;
+    line-height: 1;
+    display: inline-block;
+    transform: translateY(-0.02em);
 }
 
 .nav-logo:hover {
@@ -422,10 +426,11 @@ main {
 
 /* Footer */
 .footer {
-    border-top: 1px solid var(--border);
+    border-top: none;
     margin-top: 6rem;
     padding: 4rem 2rem;
-    background: var(--bg-primary);
+    background: #000000;
+    color: #ffffff;
 }
 
 .footer-content {
@@ -440,7 +445,7 @@ main {
 
 .footer-text {
     font-size: 1rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
     font-weight: 400;
     line-height: 1.6;
     max-width: 600px;
@@ -455,7 +460,7 @@ main {
 
 .footer-link {
     font-size: 0.95rem;
-    color: var(--text-primary);
+    color: rgba(255, 255, 255, 0.95);
     text-decoration: none;
     transition: opacity 0.2s;
     font-weight: 400;
@@ -467,7 +472,7 @@ main {
 
 .footer-copyright {
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.65);
     margin-top: 1rem;
 }
 
