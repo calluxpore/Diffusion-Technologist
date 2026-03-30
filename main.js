@@ -4,6 +4,7 @@
 const modelsGrid = document.getElementById('models-grid');
 const loadingEl = document.getElementById('loading');
 const errorEl = document.getElementById('error');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /**
  * Smooth scroll to an element with custom animation
@@ -13,6 +14,11 @@ function smoothScrollToElement(element) {
     const navbarHeight = navbar ? navbar.offsetHeight : 0;
     const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
     const offsetPosition = elementPosition - navbarHeight - 20;
+
+    if (prefersReducedMotion.matches) {
+        window.scrollTo(0, offsetPosition);
+        return;
+    }
     
     const startPosition = window.pageYOffset;
     const distance = offsetPosition - startPosition;
@@ -83,7 +89,7 @@ function createVideoElement(videoPath) {
     video.loop = true;
     video.muted = true;
     video.playsInline = true;
-    video.preload = 'auto';
+    video.preload = 'metadata';
     video.setAttribute('playsinline', '');
     video.setAttribute('muted', '');
     video.setAttribute('autoplay', '');
@@ -278,6 +284,8 @@ function renderModels(models) {
         'Typography & Digital': '🔤'
     };
 
+    const fragment = document.createDocumentFragment();
+
     // Most Recent Models section: Journal Sketching, Paper Warframe, Whimsical, Impasto
     const journalSketching = models.find(m => m.name === 'Journal Sketching');
     const paperWarframe = { name: 'Paper Warframe', slug: 'Paper Warframe', tags: ['ZImage', 'ZImage Turbo', 'Flux'], civitaiUrl: 'https://civitai.com/models/2382885?modelVersionId=2679665' };
@@ -286,7 +294,7 @@ function renderModels(models) {
     const mostRecent = [journalSketching, paperWarframe, whimsical, impasto].filter(Boolean);
     if (mostRecent.length > 0) {
         const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
-        modelsGrid.appendChild(recentHeader);
+        fragment.appendChild(recentHeader);
         const recentGrid = document.createElement('div');
         recentGrid.className = 'category-grid';
         mostRecent.forEach((model, index) => {
@@ -294,14 +302,14 @@ function renderModels(models) {
             card.style.animationDelay = `${index * 0.05}s`;
             recentGrid.appendChild(card);
         });
-        modelsGrid.appendChild(recentGrid);
+        fragment.appendChild(recentGrid);
     }
     
     // Render each category
-    Object.keys(categories).sort().forEach(categoryName => {
+    Object.keys(categories).sort((a, b) => a.localeCompare(b)).forEach(categoryName => {
         // Create category header
         const header = createCategoryHeader(categoryName, categoryIcons[categoryName] || '📁');
-        modelsGrid.appendChild(header);
+        fragment.appendChild(header);
         
         // Create category grid
         const categoryGrid = document.createElement('div');
@@ -315,8 +323,10 @@ function renderModels(models) {
             categoryGrid.appendChild(card);
         });
         
-        modelsGrid.appendChild(categoryGrid);
+        fragment.appendChild(categoryGrid);
     });
+
+    modelsGrid.appendChild(fragment);
     
     // Setup Intersection Observer for video autoplay on mobile
     setupVideoAutoplay();
@@ -347,7 +357,8 @@ function setupVideoAutoplay() {
                 }
             });
         }, {
-            rootMargin: '50px' // Start loading slightly before video enters viewport
+            rootMargin: '120px 0px',
+            threshold: 0.1
         });
         
         videos.forEach(video => {
@@ -379,6 +390,7 @@ function showError(message) {
 function renderCategoryButtons(models) {
     const categoryButtonsContainer = document.getElementById('category-buttons');
     if (!categoryButtonsContainer) return;
+    categoryButtonsContainer.innerHTML = '';
     
     // Get unique categories
     const categories = new Set();
@@ -402,14 +414,16 @@ function renderCategoryButtons(models) {
     };
 
     // Add "Most Recent Models" button first
+    const fragment = document.createDocumentFragment();
     const mostRecentButton = createCategoryButton('Most Recent Models', categoryIcons['Most Recent Models']);
-    categoryButtonsContainer.appendChild(mostRecentButton);
+    fragment.appendChild(mostRecentButton);
 
     // Create buttons for each category
-    Array.from(categories).sort().forEach(categoryName => {
+    Array.from(categories).sort((a, b) => a.localeCompare(b)).forEach(categoryName => {
         const button = createCategoryButton(categoryName, categoryIcons[categoryName] || '📁');
-        categoryButtonsContainer.appendChild(button);
+        fragment.appendChild(button);
     });
+    categoryButtonsContainer.appendChild(fragment);
 }
 
 /**
@@ -433,6 +447,11 @@ async function init() {
  * Smooth scroll to top function
  */
 function smoothScrollToTop() {
+    if (prefersReducedMotion.matches) {
+        window.scrollTo(0, 0);
+        return;
+    }
+
     const startPosition = window.pageYOffset;
     const distance = -startPosition;
     const duration = 800; // milliseconds
