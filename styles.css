@@ -6,6 +6,7 @@
 }
 
 :root {
+    --content-max-width: 1920px;
     --bg-primary: #ffffff;
     --bg-secondary: #f8f8f8;
     --bg-card: #ffffff;
@@ -41,7 +42,7 @@ body {
 }
 
 .nav-container {
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     width: 100%;
     padding: 1.25rem clamp(1.5rem, 4vw, 3rem);
     margin: 0 auto;
@@ -98,7 +99,7 @@ body {
 }
 
 .hero-inner {
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     width: 100%;
     min-height: min(85vh, 52rem);
@@ -184,7 +185,7 @@ body {
 /* Category Buttons Section */
 .category-buttons-section {
     padding: 3rem 2rem;
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     width: 100%;
     border-bottom: 1px dotted var(--border);
@@ -242,7 +243,7 @@ body {
 main {
     flex: 1;
     padding: 3rem 2rem;
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     width: 100%;
 }
@@ -434,7 +435,7 @@ main {
 }
 
 .footer-content {
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
