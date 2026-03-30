@@ -1,19 +1,15 @@
-# LoRA Model Portfolio
+# LoRA Archive
 
-A static portfolio website showcasing custom LoRA models.
+This is my personal portfolio project for the LoRA models I have trained.
 
-Built with vanilla HTML, CSS, and JavaScript. No build process required.
+It is hosted on GitHub Pages and connected to my main website: [www.samreddy.work](https://www.samreddy.work).
 
-## Structure
+## What This Website Has
 
-- `index.html` - Main page
-- `styles.css` - Styling
-- `main.js` - Application logic
-- `models.json` - Model data
-- `media/` - Video previews
+- Hero section with project identity and context
+- Category-wise model browsing
+- Auto-generated category navigation buttons
+- Model cards with video previews
+- Direct links from cards to model pages
+- Responsive layout for desktop, tablet, and mobile
 
-## Setup
-
-1. Add model data to `models.json`
-2. Add video files to `media/` folder (matching slug names)
-3. Deploy to GitHub Pages or any static host
