@@ -286,12 +286,12 @@ function renderModels(models) {
 
     const fragment = document.createDocumentFragment();
 
-    // Most Recent Models section: Journal Sketching, Paper Warframe, Whimsical, Impasto
+    // Most Recent Models section: Hallucination, Journal Sketching, Whimsical, Impasto
+    const hallucination = models.find(m => m.name === 'Hallucination');
     const journalSketching = models.find(m => m.name === 'Journal Sketching');
-    const paperWarframe = { name: 'Paper Warframe', slug: 'Paper Warframe', tags: ['ZImage', 'ZImage Turbo', 'Flux'], civitaiUrl: 'https://civitai.com/models/2382885?modelVersionId=2679665' };
     const whimsical = models.find(m => m.name === 'Whimsical');
     const impasto = models.find(m => m.name === 'Impasto');
-    const mostRecent = [journalSketching, paperWarframe, whimsical, impasto].filter(Boolean);
+    const mostRecent = [hallucination, journalSketching, whimsical, impasto].filter(Boolean);
     if (mostRecent.length > 0) {
         const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
         fragment.appendChild(recentHeader);

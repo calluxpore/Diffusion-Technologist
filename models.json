@@ -210,6 +210,13 @@
     "tags": ["SD1", "Flux"]
   },
   {
+    "name": "Hallucination",
+    "slug": "Hallucination",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/2546958/hallucination",
+    "tags": ["ZImage Turbo"]
+  },
+  {
     "name": "High Fashion",
     "slug": "High Fashion",
     "category": "Fashion",
