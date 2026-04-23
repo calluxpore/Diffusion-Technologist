@@ -82,9 +82,12 @@ function createVideoPlaceholder() {
 /**
  * Create a video element with proper attributes
  */
-function createVideoElement(videoPath) {
+function createVideoElement(videoPath, posterPath) {
     const video = document.createElement('video');
     video.src = videoPath;
+    if (posterPath) {
+        video.poster = posterPath;
+    }
     video.autoplay = true;
     video.loop = true;
     video.muted = true;
@@ -136,7 +139,8 @@ function createModelCard(model) {
     videoContainer.className = 'video-container';
     
     const videoPath = `media/${model.slug}.mp4`;
-    const video = createVideoElement(videoPath);
+    const posterPath = `media/${model.slug}.webp`;
+    const video = createVideoElement(videoPath, posterPath);
     videoContainer.appendChild(video);
     
     // Create card content
