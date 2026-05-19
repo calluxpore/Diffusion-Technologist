@@ -290,12 +290,12 @@ function renderModels(models) {
 
     const fragment = document.createDocumentFragment();
 
-    // Most Recent Models section: Hallucination, Journal Sketching, Whimsical, Impasto
+    // Most Recent Models section: Anfema, Hallucination, Journal Sketching, Impasto
+    const anfema = models.find(m => m.name === 'Anfema');
     const hallucination = models.find(m => m.name === 'Hallucination');
     const journalSketching = models.find(m => m.name === 'Journal Sketching');
-    const whimsical = models.find(m => m.name === 'Whimsical');
     const impasto = models.find(m => m.name === 'Impasto');
-    const mostRecent = [hallucination, journalSketching, whimsical, impasto].filter(Boolean);
+    const mostRecent = [anfema, hallucination, journalSketching, impasto].filter(Boolean);
     if (mostRecent.length > 0) {
         const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
         fragment.appendChild(recentHeader);

@@ -203,6 +203,13 @@
     "tags": ["SD1"]
   },
   {
+    "name": "Anfema",
+    "slug": "Anfema",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2632422/anfema",
+    "tags": ["Anima V1"]
+  },
+  {
     "name": "Halftone Punk",
     "slug": "Halftone Punk",
     "category": "Art Styles & Techniques",
