@@ -28,6 +28,13 @@
     "tags": ["ZImage Turbo"]
   },
   {
+    "name": "Anbui",
+    "slug": "Anbui",
+    "category": "Architecture",
+    "civitaiUrl": "https://civitai.com/models/2634747/anbui",
+    "tags": ["Anima V1"]
+  },
+  {
     "name": "Anime Style Variant",
     "slug": "Anime Style Variant",
     "category": "Anime & Fantasy",
@@ -224,6 +231,13 @@
     "tags": ["ZImage Turbo"]
   },
   {
+    "name": "HeptapodB",
+    "slug": "HeptapodB",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2644591/heptapod-b-look-alike?modelVersionId=2969479",
+    "tags": ["Anima V1"]
+  },
+  {
     "name": "High Fashion",
     "slug": "High Fashion",
     "category": "Fashion",
@@ -236,6 +250,13 @@
     "category": "Art Styles & Techniques",
     "civitaiUrl": "https://civitai.com/models/2259570/impasto",
     "tags": ["ZImage Turbo"]
+  },
+  {
+    "name": "Industrial Design Anima Style Rendering",
+    "slug": "IDA",
+    "category": "Industrial Design",
+    "civitaiUrl": "https://civitai.com/models/808366/industrial-design-x-marker-rendering",
+    "tags": ["Anima V1"]
   },
   {
     "name": "Industrial Design X Marker Rendering",
