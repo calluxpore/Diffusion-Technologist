@@ -2,7 +2,7 @@
 
 This is my personal portfolio project for the LoRA models I have trained.
 
-It is hosted on GitHub Pages and connected to my main website: [www.samreddy.work](https://www.samreddy.work).
+It is hosted on GitHub Pages and connected to my main website: https://portfolio-5208db.webflow.io/.
 
 ## What This Website Has
 
