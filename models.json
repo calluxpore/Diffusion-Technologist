@@ -273,6 +273,13 @@
     "tags": ["ZImage Turbo"]
   },
   {
+    "name": "Joy Potter",
+    "slug": "Joy Potter",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2721976/joy-potter",
+    "tags": ["Anima V1"]
+  },
+  {
     "name": "Industrial Design X Sketch",
     "slug": "Industrial Design X Sketch",
     "category": "Industrial Design",
@@ -439,6 +446,13 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/1585101/templar-flux-lora",
     "tags": ["Flux"]
+  },
+  {
+    "name": "The Iron Warden",
+    "slug": "The Iron Warden",
+    "category": "Sci-Fi & Cyberpunk",
+    "civitaiUrl": "https://civitai.com/models/2724891/the-iron-warden",
+    "tags": ["Anima V1"]
   },
   {
     "name": "Varang",
