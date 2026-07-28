@@ -515,13 +515,52 @@ function initScrollToTop() {
     handleScroll();
 }
 
+/**
+ * Initialize theme toggle manager (Light/Dark mode)
+ */
+function initThemeManager() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) return;
+
+    // Helper to apply theme
+    const applyTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        themeToggleBtn.setAttribute('aria-label', label);
+        themeToggleBtn.setAttribute('title', label);
+    };
+
+    // Determine current theme
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(currentTheme);
+
+    // Toggle button click listener
+    themeToggleBtn.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme');
+        const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem('theme', nextTheme);
+    });
+
+    // Listen for OS color scheme changes if user hasn't explicitly set theme in localStorage
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+}
+
 // Start the application when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        initThemeManager();
         init();
         initScrollToTop();
     });
 } else {
+    initThemeManager();
     init();
     initScrollToTop();
 }
