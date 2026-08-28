@@ -80,49 +80,56 @@ function createVideoPlaceholder() {
 }
 
 /**
- * Create a video element with proper attributes
+ * Create a video element with proper attributes for iOS Safari & mobile compatibility
  */
 function createVideoElement(videoPath, posterPath) {
     const video = document.createElement('video');
-    video.src = videoPath;
-    if (posterPath) {
-        video.poster = posterPath;
-    }
+    video.className = 'card-video';
+    
+    // Set all iOS Safari inline autoplay & muted properties BEFORE setting src
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
     video.autoplay = true;
     video.loop = true;
-    video.muted = true;
-    video.playsInline = true;
     video.preload = 'metadata';
-    video.setAttribute('playsinline', '');
+    
     video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     video.setAttribute('autoplay', '');
     video.setAttribute('loop', '');
     
-    // Function to attempt playing the video (important for mobile)
+    if (posterPath) {
+        video.poster = posterPath;
+    }
+    
+    // Attempt play when ready
     const attemptPlay = () => {
-        if (video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+        if (video.readyState >= 2) {
             const playPromise = video.play();
             if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    // Autoplay was prevented - this is normal on some mobile browsers
-                    // Video will play when user interacts or when it comes into view via IntersectionObserver
+                playPromise.then(() => {
+                    video.classList.add('is-playing');
+                }).catch(() => {
+                    // Autoplay prevented by iOS policy or Low Power Mode
+                    // Poster img remains cleanly visible underneath
                 });
             }
         }
     };
     
-    // Try to play when video metadata is loaded (helps with mobile autoplay)
     video.addEventListener('loadedmetadata', attemptPlay);
     video.addEventListener('canplay', attemptPlay);
     video.addEventListener('loadeddata', attemptPlay);
     
-    // Handle video load errors gracefully
+    // If video load fails, hide video element so poster img remains visible
     video.addEventListener('error', () => {
-        const container = video.parentElement;
-        if (container && container.classList.contains('video-container')) {
-            container.replaceChild(createVideoPlaceholder(), video);
-        }
+        video.style.display = 'none';
     });
+    
+    // Assign src AFTER setting attributes
+    video.src = videoPath;
     
     return video;
 }
@@ -138,8 +145,30 @@ function createModelCard(model) {
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
     
-    const videoPath = `media/${model.slug}.mp4`;
-    const posterPath = `media/${model.slug}.webp`;
+    // Safely encode URLs for iOS Safari & standard HTTP servers
+    const encodedSlug = encodeURIComponent(model.slug);
+    const videoPath = `media/${encodedSlug}.mp4`;
+    const posterPath = `media/${encodedSlug}.webp`;
+    
+    // Create explicit poster image layer (critical fallback for iOS Safari / Low Power Mode)
+    const posterImg = document.createElement('img');
+    posterImg.className = 'card-poster';
+    posterImg.src = posterPath;
+    posterImg.alt = model.name;
+    posterImg.loading = 'lazy';
+    posterImg.decoding = 'async';
+    
+    // Handle poster image error (fallback to icon placeholder if both poster and video fail)
+    posterImg.addEventListener('error', () => {
+        const videoEl = videoContainer.querySelector('video');
+        if (!videoEl || videoEl.style.display === 'none') {
+            videoContainer.appendChild(createVideoPlaceholder());
+        }
+    });
+
+    videoContainer.appendChild(posterImg);
+    
+    // Create and append video element on top of poster image
     const video = createVideoElement(videoPath, posterPath);
     videoContainer.appendChild(video);
     
@@ -342,27 +371,35 @@ function renderModels(models) {
 }
 
 /**
- * Setup Intersection Observer to play videos when they come into view
- * This is especially important for mobile browsers which restrict autoplay
+ * Setup Intersection Observer & user gesture listener to play videos when they come into view
+ * iOS Safari requires muted + playsinline + safe promise handling
  */
 function setupVideoAutoplay() {
     const videos = document.querySelectorAll('.video-container video');
+    
+    const tryPlayVideo = (video) => {
+        if (video && video.paused && video.style.display !== 'none') {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    video.classList.add('is-playing');
+                }).catch(() => {
+                    // Autoplay prevented by browser - poster image remains displayed
+                });
+            }
+        }
+    };
     
     if ('IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const video = entry.target;
                 if (entry.isIntersecting) {
-                    // Video is in viewport, try to play (critical for mobile)
-                    const playPromise = video.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            // Autoplay prevented, will try again on user interaction
-                        });
-                    }
+                    tryPlayVideo(video);
                 } else {
-                    // Video is out of viewport, pause to save resources
-                    video.pause();
+                    if (!video.paused) {
+                        video.pause();
+                    }
                 }
             });
         }, {
@@ -374,14 +411,26 @@ function setupVideoAutoplay() {
             observer.observe(video);
         });
     } else {
-        // Fallback for browsers without IntersectionObserver
         videos.forEach(video => {
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(() => {});
-            }
+            tryPlayVideo(video);
         });
     }
+
+    // Global touch/click interaction handler for iOS Safari to unlock autoplay if restricted initially
+    const unlockAutoplayOnTouch = () => {
+        const allVideos = document.querySelectorAll('.video-container video');
+        allVideos.forEach(v => {
+            if (v.paused) {
+                const rect = v.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    tryPlayVideo(v);
+                }
+            }
+        });
+    };
+
+    window.addEventListener('touchstart', unlockAutoplayOnTouch, { once: true, passive: true });
+    window.addEventListener('click', unlockAutoplayOnTouch, { once: true, passive: true });
 }
 
 /**
