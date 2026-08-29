@@ -319,8 +319,7 @@ function renderModels(models) {
 
     const fragment = document.createDocumentFragment();
 
-    // Most Recent Models section: Brown Oversized Tshirt, The Iron Warden, Joy Potter, IDA, HeptapodB, Anbui, Anfema, Hallucination, Impasto
-    const brownOversizedTshirt = models.find(m => m.name === 'Brown Oversized Tshirt');
+    // Most Recent Models section: The Iron Warden, Joy Potter, IDA, HeptapodB, Anbui, Anfema, Hallucination, Impasto
     const ironWarden = models.find(m => m.name === 'The Iron Warden');
     const joyPotter = models.find(m => m.name === 'Joy Potter');
     const ida = models.find(m => m.name === 'Industrial Design Anima Style Rendering');
@@ -329,7 +328,7 @@ function renderModels(models) {
     const anfema = models.find(m => m.name === 'Anfema');
     const hallucination = models.find(m => m.name === 'Hallucination');
     const impasto = models.find(m => m.name === 'Impasto');
-    const mostRecent = [brownOversizedTshirt, ironWarden, joyPotter, ida, heptapodB, anbui, anfema, hallucination, impasto].filter(Boolean);
+    const mostRecent = [ironWarden, joyPotter, ida, heptapodB, anbui, anfema, hallucination, impasto].filter(Boolean);
     if (mostRecent.length > 0) {
         const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
         fragment.appendChild(recentHeader);

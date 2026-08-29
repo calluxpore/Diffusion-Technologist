@@ -104,13 +104,7 @@
     "civitaiUrl": "https://civitai.com/models/2152722/brown-bob-portrait",
     "tags": ["ZImage Turbo"]
   },
-  {
-    "name": "Brown Oversized Tshirt",
-    "slug": "Brown Oversized Tshirt",
-    "category": "Fashion",
-    "civitaiUrl": "https://civitai.com/models/2896485/brown-oversized-tshirt",
-    "tags": ["SDXL"]
-  },
+
   {
     "name": "Captain X Feline",
     "slug": "Captain Feline",
