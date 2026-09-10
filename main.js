@@ -1,615 +1,708 @@
-// Main application logic for LoRA Model Portfolio
+/* ==========================================================================
+   LoRA Archive — application logic
+   Loads models.json, renders category sections, and drives search + filters.
+   ========================================================================== */
 
-// DOM elements
-const modelsGrid = document.getElementById('models-grid');
-const loadingEl = document.getElementById('loading');
-const errorEl = document.getElementById('error');
+'use strict';
+
+/* --------------------------------------------------------------------------
+   Config
+   -------------------------------------------------------------------------- */
+
+const ALL = '__all__';
+const RECENT = 'Most Recent';
+
+/* Curated "most recent" shelf, newest first. Names must match models.json;
+   anything missing is skipped silently so the shelf never breaks the page. */
+const RECENT_MODELS = [
+    'The Iron Warden',
+    'Joy Potter',
+    'Industrial Design Anima Style Rendering',
+    'HeptapodB',
+    'Anbui',
+    'Anfema',
+    'Hallucination',
+    'Impasto'
+];
+
+/* Order categories by how a visitor is likely to browse, not alphabetically.
+   Anything not listed here is appended alphabetically. */
+const CATEGORY_ORDER = [
+    'Character & Portraits',
+    'Anime & Fantasy',
+    'Sci-Fi & Cyberpunk',
+    'Art Styles & Techniques',
+    'Fashion',
+    'Industrial Design',
+    'Architecture',
+    'Typography & Digital'
+];
+
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-/**
- * Smooth scroll to an element with custom animation
- */
-function smoothScrollToElement(element) {
-    const navbar = document.querySelector('.navbar');
-    const navbarHeight = navbar ? navbar.offsetHeight : 0;
-    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-    const offsetPosition = elementPosition - navbarHeight - 20;
+/* --------------------------------------------------------------------------
+   DOM
+   -------------------------------------------------------------------------- */
 
-    if (prefersReducedMotion.matches) {
-        window.scrollTo(0, offsetPosition);
-        return;
-    }
-    
-    const startPosition = window.pageYOffset;
-    const distance = offsetPosition - startPosition;
-    const duration = 800; // milliseconds
-    let start = null;
-    
-    function step(timestamp) {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        const percentage = Math.min(progress / duration, 1);
-        
-        // Easing function (ease-in-out)
-        const ease = percentage < 0.5 
-            ? 2 * percentage * percentage 
-            : 1 - Math.pow(-2 * percentage + 2, 2) / 2;
-        
-        window.scrollTo(0, startPosition + distance * ease);
-        
-        if (progress < duration) {
-            window.requestAnimationFrame(step);
-        }
-    }
-    
-    window.requestAnimationFrame(step);
-}
+const el = {
+    grid: document.getElementById('models-grid'),
+    loading: document.getElementById('loading'),
+    empty: document.getElementById('empty'),
+    error: document.getElementById('error'),
+    search: document.getElementById('search-input'),
+    searchClear: document.getElementById('search-clear'),
+    resultCount: document.getElementById('result-count'),
+    resetFilters: document.getElementById('reset-filters'),
+    emptyReset: document.getElementById('empty-reset'),
+    categoryFilters: document.getElementById('category-filters'),
+    baseFilters: document.getElementById('base-filters'),
+    progressBar: document.getElementById('progress-bar'),
+    toTop: document.getElementById('to-top')
+};
 
-/**
- * Load models from models.json file
- */
+/* --------------------------------------------------------------------------
+   State
+   -------------------------------------------------------------------------- */
+
+let allModels = [];
+const state = { query: '', category: ALL, base: ALL };
+
+/* --------------------------------------------------------------------------
+   Data
+   -------------------------------------------------------------------------- */
+
 async function loadModels() {
-    try {
-        const response = await fetch('models.json');
-        
-        if (!response.ok) {
-            throw new Error(`Failed to load models: ${response.status} ${response.statusText}`);
-        }
-        
-        const models = await response.json();
-        
-        if (!Array.isArray(models)) {
-            throw new Error('models.json must contain an array of models');
-        }
-        
-        return models;
-    } catch (error) {
-        console.error('Error loading models:', error);
-        showError(`Failed to load models: ${error.message}`);
-        return [];
+    const response = await fetch('models.json');
+    if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}`);
+    }
+    const models = await response.json();
+    if (!Array.isArray(models)) {
+        throw new Error('models.json must contain an array');
+    }
+    return models;
+}
+
+/** Pre-compute a lowercase haystack so filtering stays cheap on every keystroke. */
+function prepare(models) {
+    return models.map(model => {
+        const tags = Array.isArray(model.tags) ? model.tags : [];
+        return Object.assign({}, model, {
+            tags,
+            category: model.category || 'Uncategorized',
+            haystack: [model.name, model.category, tags.join(' ')].join(' ').toLowerCase()
+        });
+    });
+}
+
+function orderedCategories(models) {
+    const present = new Set(models.map(m => m.category));
+    const ranked = CATEGORY_ORDER.filter(name => present.has(name));
+    const rest = [...present].filter(name => !CATEGORY_ORDER.includes(name)).sort((a, b) => a.localeCompare(b));
+    return ranked.concat(rest);
+}
+
+function orderedBases(models) {
+    const counts = new Map();
+    models.forEach(model => {
+        model.tags.forEach(tag => counts.set(tag, (counts.get(tag) || 0) + 1));
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
+/* --------------------------------------------------------------------------
+   Video: only fetch an .mp4 once its card is near the viewport
+   -------------------------------------------------------------------------- */
+
+const videoObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                if (!video.src && video.dataset.src) {
+                    video.src = video.dataset.src;
+                }
+                playVideo(video);
+            } else if (!video.paused) {
+                video.pause();
+            }
+        });
+    }, { rootMargin: '250px 0px', threshold: 0.05 })
+    : null;
+
+function playVideo(video) {
+    if (!video.src || video.dataset.failed === 'true') return;
+    const attempt = video.play();
+    if (attempt && typeof attempt.then === 'function') {
+        // Autoplay can be refused (iOS Low Power Mode, data saver); the poster
+        // stays visible underneath, so a rejection needs no handling.
+        attempt.then(() => video.classList.add('is-playing')).catch(() => { });
     }
 }
 
 /**
- * Create a placeholder element for missing videos
+ * The fallback tile sits behind the poster and the video, so it only ever shows
+ * through when neither of them has anything to paint.
  */
-function createVideoPlaceholder() {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'video-placeholder';
-    return placeholder;
+function showFallback(media) {
+    if (media.querySelector('.card-media-fallback')) return;
+    const fallback = document.createElement('div');
+    fallback.className = 'card-media-fallback';
+    fallback.textContent = 'No preview';
+    media.appendChild(fallback);
 }
 
-/**
- * Create a video element with proper attributes for iOS Safari & mobile compatibility
- */
-function createVideoElement(videoPath, posterPath) {
+function clearFallback(media) {
+    const fallback = media.querySelector('.card-media-fallback');
+    if (fallback) fallback.remove();
+}
+
+function createVideo(src, poster) {
     const video = document.createElement('video');
-    video.className = 'card-video';
-    
-    // Set all iOS Safari inline autoplay & muted properties BEFORE setting src
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
-    video.autoplay = true;
     video.loop = true;
-    video.preload = 'metadata';
-    
+    video.preload = 'none';
+    video.poster = poster;
     video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
-    video.setAttribute('autoplay', '');
     video.setAttribute('loop', '');
-    
-    if (posterPath) {
-        video.poster = posterPath;
-    }
-    
-    // Attempt play when ready
-    const attemptPlay = () => {
-        if (video.readyState >= 2) {
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    video.classList.add('is-playing');
-                }).catch(() => {
-                    // Autoplay prevented by iOS policy or Low Power Mode
-                    // Poster img remains cleanly visible underneath
-                });
-            }
-        }
-    };
-    
-    video.addEventListener('loadedmetadata', attemptPlay);
-    video.addEventListener('canplay', attemptPlay);
-    video.addEventListener('loadeddata', attemptPlay);
-    
-    // If video load fails, hide video element so poster img remains visible
+    video.setAttribute('aria-hidden', 'true');
+    video.tabIndex = -1;
+    video.dataset.src = src;
+
+    video.addEventListener('loadeddata', () => playVideo(video));
     video.addEventListener('error', () => {
-        video.style.display = 'none';
+        video.dataset.failed = 'true';
+        video.remove();
     });
-    
-    // Assign src AFTER setting attributes
-    video.src = videoPath;
-    
+
     return video;
 }
 
+/* --------------------------------------------------------------------------
+   Entrance motion: reveal as each element scrolls into view
+   -------------------------------------------------------------------------- */
+
+const revealObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+        });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 })
+    : null;
+
 /**
- * Create a model card element
+ * @param {number} stagger index within its row, so grids cascade rather than
+ *   popping in as one block.
  */
-function createModelCard(model) {
-    const card = document.createElement('div');
+function reveal(element, stagger) {
+    // Without an observer, or with motion turned down, show it outright — never
+    // leave content stranded at opacity 0.
+    if (!revealObserver || prefersReducedMotion.matches) {
+        element.classList.add('reveal', 'in');
+        return;
+    }
+    element.classList.add('reveal');
+    if (stagger) element.style.transitionDelay = `${(stagger % 5) * 55}ms`;
+    revealObserver.observe(element);
+}
+
+/* --------------------------------------------------------------------------
+   Rendering
+   -------------------------------------------------------------------------- */
+
+function createCard(model, index) {
+    // An anchor (rather than a click handler) so cards support middle-click,
+    // open-in-new-tab and copy-link like any other link.
+    const card = document.createElement('a');
     card.className = 'model-card';
-    
-    // Create video container
-    const videoContainer = document.createElement('div');
-    videoContainer.className = 'video-container';
-    
-    // Safely encode URLs for iOS Safari & standard HTTP servers
-    const encodedSlug = encodeURIComponent(model.slug);
-    const videoPath = `media/${encodedSlug}.mp4`;
-    const posterPath = `media/${encodedSlug}.webp`;
-    
-    // Create explicit poster image layer (critical fallback for iOS Safari / Low Power Mode)
-    const posterImg = document.createElement('img');
-    posterImg.className = 'card-poster';
-    posterImg.src = posterPath;
-    posterImg.alt = model.name;
-    posterImg.loading = 'lazy';
-    posterImg.decoding = 'async';
-    
-    // Handle poster image error (fallback to icon placeholder if both poster and video fail)
-    posterImg.addEventListener('error', () => {
-        const videoEl = videoContainer.querySelector('video');
-        if (!videoEl || videoEl.style.display === 'none') {
-            videoContainer.appendChild(createVideoPlaceholder());
+    if (model.civitaiUrl) {
+        card.href = model.civitaiUrl;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+        card.setAttribute('aria-label', `${model.name} — open on Civitai`);
+    }
+    reveal(card, index);
+
+    const media = document.createElement('div');
+    media.className = 'card-media';
+
+    const slug = encodeURIComponent(model.slug);
+    const posterPath = `media/${slug}.webp`;
+    const videoPath = `media/${slug}.mp4`;
+
+    const poster = document.createElement('img');
+    poster.className = 'card-poster';
+    poster.src = posterPath;
+    poster.alt = `Preview of the ${model.name} LoRA`;
+    poster.loading = 'lazy';
+    poster.decoding = 'async';
+    poster.width = 600;
+    poster.height = 800;
+
+    let retried = false;
+    poster.addEventListener('error', () => {
+        if (!retried) {
+            // A dropped request — a flaky connection, or one of 70-odd posters
+            // losing its turn — should not blank the card permanently.
+            retried = true;
+            setTimeout(() => { poster.src = `${posterPath}?retry=1`; }, 700);
+            return;
         }
+        poster.hidden = true;
+        showFallback(media);
     });
 
-    videoContainer.appendChild(posterImg);
-    
-    // Create and append video element on top of poster image
-    const video = createVideoElement(videoPath, posterPath);
-    videoContainer.appendChild(video);
-    
-    // Create card content
-    const cardContent = document.createElement('div');
-    cardContent.className = 'card-content';
-    
-    // Title
-    const title = document.createElement('h2');
+    poster.addEventListener('load', () => {
+        poster.hidden = false;
+        clearFallback(media);
+    });
+
+    media.appendChild(poster);
+
+    const video = createVideo(videoPath, posterPath);
+    media.appendChild(video);
+    if (videoObserver) {
+        videoObserver.observe(video);
+    } else {
+        video.src = videoPath;
+    }
+
+    // A model can target several bases, so every one gets its own badge. The base
+    // being filtered on leads, otherwise a Flux search shows cards led by SD1.
+    if (model.tags.length) {
+        const ordered = model.tags.includes(state.base)
+            ? [state.base].concat(model.tags.filter(tag => tag !== state.base))
+            : model.tags;
+
+        const badges = document.createElement('div');
+        badges.className = 'card-badges';
+        ordered.forEach(tag => {
+            const badge = document.createElement('span');
+            badge.className = 'card-badge';
+            badge.textContent = tag;
+            badges.appendChild(badge);
+        });
+        media.appendChild(badges);
+    }
+
+    if (model.civitaiUrl) {
+        const cta = document.createElement('span');
+        cta.className = 'card-cta';
+        cta.textContent = 'View on Civitai ↗';
+        media.appendChild(cta);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const title = document.createElement('h3');
     title.className = 'card-title';
     title.textContent = model.name;
-    cardContent.appendChild(title);
-    
-    // Tags
-    if (model.tags && model.tags.length > 0) {
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = 'card-tags';
-        
-        model.tags.forEach(tag => {
-            const tagEl = document.createElement('span');
-            tagEl.className = 'tag';
-            tagEl.textContent = tag;
-            tagsContainer.appendChild(tagEl);
-        });
-        
-        cardContent.appendChild(tagsContainer);
-    }
-    
-    // Assemble card
-    card.appendChild(videoContainer);
-    card.appendChild(cardContent);
-    
-    // Add click handler to open Civitai page
-    card.addEventListener('click', () => {
-        if (model.civitaiUrl) {
-            window.open(model.civitaiUrl, '_blank', 'noopener,noreferrer');
-        }
-    });
-    
-    // Add keyboard accessibility
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `View ${model.name} on Civitai`);
-    
-    card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            if (model.civitaiUrl) {
-                window.open(model.civitaiUrl, '_blank', 'noopener,noreferrer');
-            }
-        }
-    });
-    
+    body.appendChild(title);
+
+    const meta = document.createElement('p');
+    meta.className = 'card-meta';
+    // Bases live in the badges now, so the meta line carries only the category.
+    meta.textContent = model.category;
+    body.appendChild(meta);
+
+    card.appendChild(media);
+    card.appendChild(body);
     return card;
 }
 
-/**
- * Create a category header element
- */
-function createCategoryHeader(categoryName, icon) {
+function createSection(title, models) {
+    const section = document.createElement('section');
+    section.className = 'category-section';
+
     const header = document.createElement('div');
     header.className = 'category-header';
-    header.id = `category-${categoryName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}`;
-    
-    const iconEl = document.createElement('span');
-    iconEl.className = 'category-icon';
-    iconEl.textContent = icon;
-    
-    const textEl = document.createElement('span');
-    textEl.className = 'category-text';
-    textEl.textContent = categoryName;
-    
-    header.appendChild(iconEl);
-    header.appendChild(textEl);
-    
-    return header;
+    header.id = `section-${slugify(title)}`;
+
+    const heading = document.createElement('h2');
+    heading.className = 'category-title';
+    heading.textContent = title;
+
+    const count = document.createElement('span');
+    count.className = 'category-count';
+    count.textContent = `${models.length} ${models.length === 1 ? 'model' : 'models'}`;
+
+    header.appendChild(heading);
+    header.appendChild(count);
+    section.appendChild(header);
+    reveal(header, 0);
+
+    const grid = document.createElement('div');
+    grid.className = 'category-grid';
+    models.forEach((model, index) => grid.appendChild(createCard(model, index)));
+    section.appendChild(grid);
+
+    return section;
+}
+
+function slugify(value) {
+    return value.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 /**
- * Create a category button element
+ * Test a model against the active filters. Pass an axis name to ignore that one
+ * axis, which is how each chip reports what it would yield if it were clicked.
  */
-function createCategoryButton(categoryName, icon) {
-    const button = document.createElement('button');
-    button.className = 'category-button';
-    button.type = 'button';
-    
-    const iconEl = document.createElement('span');
-    iconEl.className = 'category-button-icon';
-    iconEl.textContent = icon;
-    
-    const textEl = document.createElement('span');
-    textEl.className = 'category-button-text';
-    textEl.textContent = categoryName;
-    
-    button.appendChild(iconEl);
-    button.appendChild(textEl);
-    
-    // Add click handler for smooth scroll
-    button.addEventListener('click', (e) => {
-        e.preventDefault();
-        const categoryId = `category-${categoryName.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')}`;
-        const categoryElement = document.getElementById(categoryId);
-        if (categoryElement) {
-            smoothScrollToElement(categoryElement);
-        }
-    });
-    
-    return button;
+function matches(model, ignore) {
+    if (ignore !== 'category' && state.category !== ALL && model.category !== state.category) return false;
+    if (ignore !== 'base' && state.base !== ALL && !model.tags.includes(state.base)) return false;
+    if (state.query && !model.haystack.includes(state.query)) return false;
+    return true;
 }
 
-/**
- * Render all model cards grouped by category
- */
-function renderModels(models) {
-    if (models.length === 0) {
-        showError('No models found in models.json');
+function render() {
+    const visible = allModels.filter(model => matches(model));
+
+    // Cards are rebuilt on every render, so drop the observers' stale targets.
+    if (videoObserver) videoObserver.disconnect();
+    if (revealObserver) revealObserver.disconnect();
+    el.grid.replaceChildren();
+
+    if (!visible.length) {
+        el.empty.hidden = false;
+        updateChrome(0);
         return;
     }
-    
-    // Clear loading state
-    loadingEl.style.display = 'none';
-    
-    // Clear grid
-    modelsGrid.innerHTML = '';
-    
-    // Group models by category
-    const categories = {};
-    models.forEach(model => {
-        const category = model.category || 'Uncategorized';
-        if (!categories[category]) {
-            categories[category] = [];
-        }
-        categories[category].push(model);
-    });
-    
-    // Category icons mapping
-    const categoryIcons = {
-        'Most Recent Models': '🎉',
-        'Character & Portraits': '👤',
-        'Fashion': '👗',
-        'Art Styles & Techniques': '🎨',
-        'Industrial Design': '✏️',
-        'Sci-Fi & Cyberpunk': '🤖',
-        'Anime & Fantasy': '✨',
-        'Architecture': '🏛️',
-        'Typography & Digital': '🔤'
-    };
+    el.empty.hidden = true;
 
     const fragment = document.createDocumentFragment();
+    const isFiltered = state.query !== '' || state.category !== ALL || state.base !== ALL;
 
-    // Most Recent Models section: The Iron Warden, Joy Potter, IDA, HeptapodB, Anbui, Anfema, Hallucination, Impasto
-    const ironWarden = models.find(m => m.name === 'The Iron Warden');
-    const joyPotter = models.find(m => m.name === 'Joy Potter');
-    const ida = models.find(m => m.name === 'Industrial Design Anima Style Rendering');
-    const heptapodB = models.find(m => m.name === 'HeptapodB');
-    const anbui = models.find(m => m.name === 'Anbui');
-    const anfema = models.find(m => m.name === 'Anfema');
-    const hallucination = models.find(m => m.name === 'Hallucination');
-    const impasto = models.find(m => m.name === 'Impasto');
-    const mostRecent = [ironWarden, joyPotter, ida, heptapodB, anbui, anfema, hallucination, impasto].filter(Boolean);
-    if (mostRecent.length > 0) {
-        const recentHeader = createCategoryHeader('Most Recent Models', categoryIcons['Most Recent Models']);
-        fragment.appendChild(recentHeader);
-        const recentGrid = document.createElement('div');
-        recentGrid.className = 'category-grid';
-        mostRecent.forEach((model, index) => {
-            const card = createModelCard(model);
-            card.style.animationDelay = `${index * 0.05}s`;
-            recentGrid.appendChild(card);
-        });
-        fragment.appendChild(recentGrid);
+    // The recent shelf duplicates models that also appear in their own category,
+    // so it is only useful on the unfiltered browse view.
+    if (!isFiltered) {
+        const recent = RECENT_MODELS
+            .map(name => allModels.find(model => model.name === name))
+            .filter(Boolean);
+        if (recent.length) {
+            fragment.appendChild(createSection(RECENT, recent));
+        }
     }
-    
-    // Render each category
-    Object.keys(categories).sort((a, b) => a.localeCompare(b)).forEach(categoryName => {
-        // Create category header
-        const header = createCategoryHeader(categoryName, categoryIcons[categoryName] || '📁');
-        fragment.appendChild(header);
-        
-        // Create category grid
-        const categoryGrid = document.createElement('div');
-        categoryGrid.className = 'category-grid';
-        
-        // Add cards for this category
-        categories[categoryName].forEach((model, index) => {
-            const card = createModelCard(model);
-            // Add animation delay based on index within category
-            card.style.animationDelay = `${index * 0.05}s`;
-            categoryGrid.appendChild(card);
-        });
-        
-        fragment.appendChild(categoryGrid);
+
+    orderedCategories(visible).forEach(category => {
+        const models = visible.filter(model => model.category === category);
+        if (models.length) fragment.appendChild(createSection(category, models));
     });
 
-    modelsGrid.appendChild(fragment);
-    
-    // Setup Intersection Observer for video autoplay on mobile
-    setupVideoAutoplay();
+    el.grid.appendChild(fragment);
+    updateChrome(visible.length);
 }
 
-/**
- * Setup Intersection Observer & user gesture listener to play videos when they come into view
- * iOS Safari requires muted + playsinline + safe promise handling
- */
-function setupVideoAutoplay() {
-    const videos = document.querySelectorAll('.video-container video');
-    
-    const tryPlayVideo = (video) => {
-        if (video && video.paused && video.style.display !== 'none') {
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    video.classList.add('is-playing');
-                }).catch(() => {
-                    // Autoplay prevented by browser - poster image remains displayed
-                });
-            }
+function updateChrome(count) {
+    const total = allModels.length;
+    el.resultCount.textContent = count === total
+        ? `${total} models`
+        : `${count} of ${total} models`;
+
+    const isFiltered = state.query !== '' || state.category !== ALL || state.base !== ALL;
+    el.resetFilters.hidden = !isFiltered;
+
+    // Each chip shows what it would yield against the *other* active filters, so
+    // dead-end combinations are visible before they are clicked.
+    const byCategory = allModels.filter(model => matches(model, 'category'));
+    const byBase = allModels.filter(model => matches(model, 'base'));
+
+    refreshChips(el.categoryFilters, state.category, value =>
+        value === ALL ? byCategory.length : byCategory.filter(m => m.category === value).length);
+
+    refreshChips(el.baseFilters, state.base, value =>
+        value === ALL ? byBase.length : byBase.filter(m => m.tags.includes(value)).length);
+
+    syncUrl();
+}
+
+function refreshChips(container, active, countFor) {
+    container.querySelectorAll('.chip').forEach(chip => {
+        const value = chip.dataset.value;
+        const isActive = value === active;
+        const count = countFor(value);
+
+        chip.setAttribute('aria-pressed', String(isActive));
+        chip.classList.toggle('is-empty', count === 0 && !isActive);
+
+        const badge = chip.querySelector('.chip-count');
+        if (badge) badge.textContent = count;
+    });
+}
+
+/* --------------------------------------------------------------------------
+   Filters
+   -------------------------------------------------------------------------- */
+
+function createChip(label, value, count) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.dataset.value = value;
+    chip.setAttribute('aria-pressed', 'false');
+
+    const text = document.createElement('span');
+    text.textContent = label;
+    chip.appendChild(text);
+
+    if (typeof count === 'number') {
+        const badge = document.createElement('span');
+        badge.className = 'chip-count';
+        badge.textContent = count;
+        chip.appendChild(badge);
+    }
+
+    return chip;
+}
+
+function buildFilters(models) {
+    const categoryFragment = document.createDocumentFragment();
+    categoryFragment.appendChild(createChip('All', ALL, models.length));
+    orderedCategories(models).forEach(category => {
+        const count = models.filter(model => model.category === category).length;
+        categoryFragment.appendChild(createChip(category, category, count));
+    });
+    el.categoryFilters.appendChild(categoryFragment);
+
+    const baseFragment = document.createDocumentFragment();
+    baseFragment.appendChild(createChip('All', ALL, models.length));
+    orderedBases(models).forEach(([base, count]) => {
+        baseFragment.appendChild(createChip(base, base, count));
+    });
+    el.baseFilters.appendChild(baseFragment);
+
+    el.categoryFilters.addEventListener('click', event => {
+        const chip = event.target.closest('.chip');
+        if (!chip) return;
+        // Tapping the active chip clears it, which is faster than hunting for "All".
+        state.category = chip.dataset.value === state.category ? ALL : chip.dataset.value;
+        render();
+        scrollToResults();
+    });
+
+    el.baseFilters.addEventListener('click', event => {
+        const chip = event.target.closest('.chip');
+        if (!chip) return;
+        state.base = chip.dataset.value === state.base ? ALL : chip.dataset.value;
+        render();
+        scrollToResults();
+    });
+}
+
+
+/** Bring the results into view when a filter is applied from a scrolled-up position. */
+function scrollToResults() {
+    const main = document.getElementById('models');
+    const header = document.querySelector('.site-header');
+    const toolbar = document.getElementById('toolbar');
+    const offset = (header ? header.offsetHeight : 0) + (toolbar ? toolbar.offsetHeight : 0);
+    const top = main.getBoundingClientRect().top + window.pageYOffset - offset - 8;
+    if (window.pageYOffset < top) {
+        window.scrollTo({ top, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
+    }
+}
+
+function initSearch() {
+    let timer;
+    el.search.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            state.query = el.search.value.trim().toLowerCase();
+            render();
+        }, 120);
+    });
+
+    el.search.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            el.search.value = '';
+            state.query = '';
+            render();
         }
+    });
+
+    el.searchClear.addEventListener('click', () => {
+        el.search.value = '';
+        state.query = '';
+        el.search.focus();
+        render();
+    });
+
+    const clearAll = () => {
+        el.search.value = '';
+        state.query = '';
+        state.category = ALL;
+        state.base = ALL;
+        render();
     };
-    
-    if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const video = entry.target;
-                if (entry.isIntersecting) {
-                    tryPlayVideo(video);
-                } else {
-                    if (!video.paused) {
-                        video.pause();
-                    }
-                }
-            });
-        }, {
-            rootMargin: '120px 0px',
-            threshold: 0.1
-        });
-        
-        videos.forEach(video => {
-            observer.observe(video);
-        });
-    } else {
-        videos.forEach(video => {
-            tryPlayVideo(video);
-        });
-    }
 
-    // Global touch/click interaction handler for iOS Safari to unlock autoplay if restricted initially
-    const unlockAutoplayOnTouch = () => {
-        const allVideos = document.querySelectorAll('.video-container video');
-        allVideos.forEach(v => {
-            if (v.paused) {
-                const rect = v.getBoundingClientRect();
-                if (rect.top < window.innerHeight && rect.bottom > 0) {
-                    tryPlayVideo(v);
-                }
-            }
-        });
-    };
+    el.resetFilters.addEventListener('click', clearAll);
+    if (el.emptyReset) el.emptyReset.addEventListener('click', clearAll);
 
-    window.addEventListener('touchstart', unlockAutoplayOnTouch, { once: true, passive: true });
-    window.addEventListener('click', unlockAutoplayOnTouch, { once: true, passive: true });
-}
-
-/**
- * Show error message
- */
-function showError(message) {
-    loadingEl.style.display = 'none';
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-}
-
-/**
- * Render category buttons in hero section
- */
-function renderCategoryButtons(models) {
-    const categoryButtonsContainer = document.getElementById('category-buttons');
-    if (!categoryButtonsContainer) return;
-    categoryButtonsContainer.innerHTML = '';
-    
-    // Get unique categories
-    const categories = new Set();
-    models.forEach(model => {
-        if (model.category) {
-            categories.add(model.category);
-        }
+    // "/" focuses search from anywhere on the page.
+    document.addEventListener('keydown', event => {
+        if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+        const tag = document.activeElement && document.activeElement.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        event.preventDefault();
+        el.search.focus();
+        el.search.select();
     });
-    
-    // Category icons mapping
-    const categoryIcons = {
-        'Most Recent Models': '🎉',
-        'Character & Portraits': '👤',
-        'Fashion': '👗',
-        'Art Styles & Techniques': '🎨',
-        'Industrial Design': '✏️',
-        'Sci-Fi & Cyberpunk': '🤖',
-        'Anime & Fantasy': '✨',
-        'Architecture': '🏛️',
-        'Typography & Digital': '🔤'
-    };
-
-    // Add "Most Recent Models" button first
-    const fragment = document.createDocumentFragment();
-    const mostRecentButton = createCategoryButton('Most Recent Models', categoryIcons['Most Recent Models']);
-    fragment.appendChild(mostRecentButton);
-
-    // Create buttons for each category
-    Array.from(categories).sort((a, b) => a.localeCompare(b)).forEach(categoryName => {
-        const button = createCategoryButton(categoryName, categoryIcons[categoryName] || '📁');
-        fragment.appendChild(button);
-    });
-    categoryButtonsContainer.appendChild(fragment);
 }
 
-/**
- * Initialize the application
- */
-async function init() {
-    try {
-        const models = await loadModels();
-        
-        if (models.length > 0) {
-            renderCategoryButtons(models);
-            renderModels(models);
-        }
-    } catch (error) {
-        console.error('Initialization error:', error);
-        showError('Failed to initialize application');
+/* --------------------------------------------------------------------------
+   Shareable URLs
+   -------------------------------------------------------------------------- */
+
+function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.query) params.set('q', state.query);
+    if (state.category !== ALL) params.set('category', state.category);
+    if (state.base !== ALL) params.set('base', state.base);
+    const query = params.toString();
+    history.replaceState(null, '', query ? `?${query}` : location.pathname);
+}
+
+function readUrl(models) {
+    const params = new URLSearchParams(location.search);
+
+    const category = params.get('category');
+    if (category && models.some(model => model.category === category)) {
+        state.category = category;
+    }
+
+    const base = params.get('base');
+    if (base && models.some(model => model.tags.includes(base))) {
+        state.base = base;
+    }
+
+    const query = params.get('q');
+    if (query) {
+        state.query = query.trim().toLowerCase();
+        el.search.value = query;
     }
 }
 
-/**
- * Smooth scroll to top function
- */
-function smoothScrollToTop() {
-    if (prefersReducedMotion.matches) {
-        window.scrollTo(0, 0);
-        return;
-    }
+/* --------------------------------------------------------------------------
+   Page chrome
+   -------------------------------------------------------------------------- */
 
-    const startPosition = window.pageYOffset;
-    const distance = -startPosition;
-    const duration = 800; // milliseconds
-    let start = null;
-    
-    function step(timestamp) {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        const percentage = Math.min(progress / duration, 1);
-        
-        // Easing function (ease-in-out)
-        const ease = percentage < 0.5 
-            ? 2 * percentage * percentage 
-            : 1 - Math.pow(-2 * percentage + 2, 2) / 2;
-        
-        window.scrollTo(0, startPosition + distance * ease);
-        
-        if (progress < duration) {
-            window.requestAnimationFrame(step);
-        }
-    }
-    
-    window.requestAnimationFrame(step);
-}
+function initTheme() {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
 
-/**
- * Initialize scroll to top button
- */
-function initScrollToTop() {
-    const scrollButton = document.getElementById('scroll-to-top');
-    if (!scrollButton) return;
-    
-    // Show/hide button based on scroll position
-    function handleScroll() {
-        const scrollThreshold = 300; // Show button after scrolling 300px
-        if (window.pageYOffset > scrollThreshold) {
-            scrollButton.classList.add('visible');
-        } else {
-            scrollButton.classList.remove('visible');
-        }
-    }
-    
-    // Add scroll event listener
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Add click event listener
-    scrollButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        smoothScrollToTop();
-    });
-    
-    // Initial check
-    handleScroll();
-}
-
-/**
- * Initialize theme toggle manager (Light/Dark mode)
- */
-function initThemeManager() {
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (!themeToggleBtn) return;
-
-    // Helper to apply theme
-    const applyTheme = (theme) => {
+    const apply = theme => {
         document.documentElement.setAttribute('data-theme', theme);
-        const isDark = theme === 'dark';
-        const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-        themeToggleBtn.setAttribute('aria-label', label);
-        themeToggleBtn.setAttribute('title', label);
+        const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('title', label);
     };
 
-    // Determine current theme
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    applyTheme(currentTheme);
+    apply(document.documentElement.getAttribute('data-theme') || 'light');
 
-    // Toggle button click listener
-    themeToggleBtn.addEventListener('click', () => {
-        const activeTheme = document.documentElement.getAttribute('data-theme');
-        const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(nextTheme);
-        localStorage.setItem('theme', nextTheme);
+    toggle.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        apply(next);
+        localStorage.setItem('theme', next);
     });
 
-    // Listen for OS color scheme changes if user hasn't explicitly set theme in localStorage
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-            applyTheme(e.matches ? 'dark' : 'light');
-        }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (!localStorage.getItem('theme')) apply(event.matches ? 'dark' : 'light');
     });
 }
 
-// Start the application when DOM is ready
+/** Keep --toolbar-h in sync so section anchors clear the sticky chrome. */
+function trackToolbarHeight() {
+    const toolbar = document.getElementById('toolbar');
+    if (!toolbar) return;
+
+    const measure = () => {
+        document.documentElement.style.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
+    };
+
+    measure();
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(measure).observe(toolbar);
+    } else {
+        window.addEventListener('resize', measure, { passive: true });
+    }
+}
+
+function initScrollChrome() {
+    let ticking = false;
+
+    const update = () => {
+        const scrolled = window.pageYOffset;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+
+        if (el.progressBar) {
+            el.progressBar.style.transform = `scaleX(${max > 0 ? Math.min(scrolled / max, 1) : 0})`;
+        }
+        if (el.toTop) {
+            el.toTop.classList.toggle('is-visible', scrolled > 600);
+        }
+        ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+    }, { passive: true });
+
+    window.addEventListener('resize', update, { passive: true });
+    update();
+
+    if (el.toTop) {
+        el.toTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
+        });
+    }
+}
+
+function showError(message) {
+    el.loading.hidden = true;
+    el.error.hidden = false;
+    el.error.textContent = message;
+}
+
+/* --------------------------------------------------------------------------
+   Boot
+   -------------------------------------------------------------------------- */
+
+async function init() {
+    initTheme();
+    initScrollChrome();
+    trackToolbarHeight();
+
+    try {
+        allModels = prepare(await loadModels());
+    } catch (error) {
+        console.error('Failed to load models:', error);
+        showError('The model archive could not be loaded. Please refresh the page.');
+        return;
+    }
+
+    if (!allModels.length) {
+        showError('No models are published yet.');
+        return;
+    }
+
+    el.loading.hidden = true;
+
+    buildFilters(allModels);
+    initSearch();
+    readUrl(allModels);
+    render();
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initThemeManager();
-        init();
-        initScrollToTop();
-    });
+    document.addEventListener('DOMContentLoaded', init);
 } else {
-    initThemeManager();
     init();
-    initScrollToTop();
 }

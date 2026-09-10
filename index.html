@@ -1,99 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoRA Archive</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+    <title>LoRA Archive — Samarth Reddy</title>
+    <meta name="description"
+        content="An open-source archive of LoRA models trained by Samarth Reddy — character, fashion, architecture, industrial design, typography and art-style weights for SD1, SDXL, Flux, ZImage and Anima.">
+    <meta name="author" content="Samarth Reddy">
+    <meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0e0e11" media="(prefers-color-scheme: dark)">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LoRA Archive — Samarth Reddy">
+    <meta property="og:description"
+        content="Open-source LoRA model weights and fine-tuning experiments, free forever.">
+    <meta property="og:image" content="logo/DPL_Logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="logo/DPL_Logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter+Tight:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=2">
+
     <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {
+            var saved = localStorage.getItem('theme');
+            var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         })();
     </script>
 </head>
+
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="https://portfolio-5208db.webflow.io/" class="nav-logo" target="_blank" rel="noopener noreferrer"><span class="nav-mark" aria-hidden="true">✱</span> Sam</a>
-            <div class="nav-right">
-                <a href="https://portfolio-5208db.webflow.io/" class="nav-link" target="_blank" rel="noopener noreferrer">Main Portfolio</a>
-                <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M12 2v2"></path>
-                        <path d="M12 20v2"></path>
-                        <path d="m4.93 4.93 1.41 1.41"></path>
-                        <path d="m17.66 17.66 1.41 1.41"></path>
-                        <path d="M2 12h2"></path>
-                        <path d="M22 12h-2"></path>
-                        <path d="m6.34 17.66-1.41 1.41"></path>
-                        <path d="m19.07 4.93-1.41 1.41"></path>
+    <a class="skip-link" href="#models">Skip to models</a>
+
+    <header class="site-header">
+        <div class="container">
+            <div class="nav">
+                <a class="nav-logo" href="https://portfolio-5208db.webflow.io/" target="_blank"
+                    rel="noopener noreferrer">
+                    <span class="nav-mark" aria-hidden="true">✱</span>
+                    Samarth Reddy
+                </a>
+                <nav class="nav-right" aria-label="External profiles">
+                    <a class="nav-link" href="https://portfolio-5208db.webflow.io/" target="_blank"
+                        rel="noopener noreferrer">Portfolio</a>
+                    <a class="nav-link nav-hide-sm" href="https://calluxpore.github.io/Teaching-Portfolio/"
+                        target="_blank" rel="noopener noreferrer">Teaching</a>
+                    <a class="nav-link nav-hide-sm" href="https://huggingface.co/samredjr" target="_blank"
+                        rel="noopener noreferrer">HF</a>
+                    <a class="nav-link nav-hide-xs" href="https://civitai.com/user/callux" target="_blank"
+                        rel="noopener noreferrer">Civitai</a>
+                    <button id="theme-toggle" class="icon-btn theme-toggle" type="button"
+                        aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41">
+                            </path>
+                        </svg>
+                        <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            aria-hidden="true">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                        </svg>
+                    </button>
+                </nav>
+            </div>
+        </div>
+        <div class="progress-bar" id="progress-bar" aria-hidden="true"></div>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="container hero-inner">
+            <div class="hero-content">
+                <p class="eyebrow">Custom model weights &middot; Fine-tuning</p>
+                <h1 class="hero-title" id="hero-title">LoRA Archive</h1>
+                <p class="hero-subtitle">
+                    A working archive of the diffusion models I train — culture, art and design,
+                    rendered as weights.
+                </p>
+
+                <div class="hero-note">
+                    <span><strong>Open source and free forever.</strong> Every model links straight to its
+                        Civitai page.</span>
+                    <span><strong>Ethically trained.</strong> All training data is my own original content or
+                        synthetically generated.</span>
+                </div>
+
+                <p class="hero-description">
+                    I'm Sam — a creative technologist and designer bridging deep professional practice with
+                    advanced AI and computational design. I develop high-fidelity models at the intersection of
+                    culture, art and design, using sophisticated visualization techniques, and I bring a
+                    background from OCAD University and Coventry to the generative art community.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn plain" href="#models">Browse the archive</a>
+                    <a class="btn btn-ghost plain" href="https://civitai.com/user/callux" target="_blank"
+                        rel="noopener noreferrer">Civitai profile &#8599;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="toolbar" id="toolbar">
+        <div class="container toolbar-inner">
+            <div class="search">
+                <span class="search-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-3.5-3.5"></path>
                     </svg>
-                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </span>
+                <label class="visually-hidden" for="search-input">Search models</label>
+                <input id="search-input" type="search" placeholder="Search models, categories, base models…"
+                    autocomplete="off" spellcheck="false">
+                <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12"></path>
                     </svg>
                 </button>
+                <kbd class="search-hint">/</kbd>
             </div>
-        </div>
-    </nav>
 
-    <section class="hero" aria-label="Introduction">
-        <div class="hero-inner">
-            <div class="hero-mark">
-                <img src="logo/DPL_Logo.png" alt="LoRA Archive" width="1024" height="1024" decoding="async" fetchpriority="high">
+            <div class="filter-group" id="base-filters" role="group" aria-label="Filter by base model">
+                <span class="filter-label">Base</span>
             </div>
-            <div class="hero-content">
-                <h1 class="hero-title">LoRA<br>Archive</h1>
-                <p class="hero-subtitle">Custom Model Weights &amp; Fine-Tuning</p>
-                <p class="hero-open-source"><strong>All models below are open-source and free forever.</strong></p>
-                <p class="hero-description">
-                    Hey, I am Sam! And I am a Creative Technologist and Designer bridging deep professional expertise with advanced AI and computational design. I develop high-fidelity models at the intersection of culture, art, and design, utilizing sophisticated visualization techniques. I bring a background from OCAD University and Coventry to the generative art community.
-                </p>
-                <p class="hero-loading-note"><em>Loading high-quality content. This may take a moment.</em></p>
-                <p class="hero-loading-note"><strong>All training data is either my own original content or synthetically generated.</strong></p>
+
+            <div class="filter-group" id="category-filters" role="group" aria-label="Filter by category">
+                <span class="filter-label">Category</span>
             </div>
-        </div>
-    </section>
 
-    <section class="category-buttons-section">
-        <div class="category-buttons-container">
-            <div class="category-buttons" id="category-buttons"></div>
+            <!-- Kept for screen readers so filtering still announces its result. -->
+            <p class="result-count visually-hidden" id="result-count" role="status" aria-live="polite"></p>
+            <button class="reset-filters" id="reset-filters" type="button" hidden>Reset</button>
         </div>
-    </section>
+    </div>
 
-    <main>
-        <div id="loading" class="loading">Loading models...</div>
-        <div id="models-grid" class="models-grid"></div>
-        <div id="error" class="error" style="display: none;"></div>
+    <main class="container" id="models">
+        <p class="state" id="loading">Loading the archive…</p>
+        <div id="models-grid"></div>
+        <div class="state state-empty" id="empty" hidden>
+            <h2>No models match</h2>
+            <p>Try a different search term, or widen the filters.</p>
+            <button class="btn btn-ghost" id="empty-reset" type="button">Clear all filters</button>
+        </div>
+        <p class="state state-error" id="error" hidden></p>
     </main>
 
     <footer class="footer">
-        <div class="footer-content">
-            <p class="footer-text">Feel free to reach out! Let's connect and create something exceptional together.</p>
-            <div class="footer-links">
-                <a href="mailto:iamsamarth@gmail.com" class="footer-link">iamsamarth@gmail.com</a>
-                <a href="https://linkedin.com" class="footer-link" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <div class="footer-inner">
+            <div>
+                <p>Feel free to reach out — let's connect and create something exceptional together.</p>
+                <p class="footer-meta">&copy; 2026 Samarth Reddy &middot; All models open source, free forever</p>
             </div>
-            <p class="footer-copyright">©2026</p>
+            <nav class="footer-links" aria-label="Contact and profiles">
+                <a href="mailto:iamsamarth@gmail.com">Email</a>
+                <a href="https://portfolio-5208db.webflow.io/" target="_blank" rel="noopener noreferrer">Portfolio</a>
+                <a href="https://calluxpore.github.io/Teaching-Portfolio/" target="_blank"
+                    rel="noopener noreferrer">Teaching</a>
+                <a href="https://www.linkedin.com/in/samredjunior" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://github.com/calluxpore" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://huggingface.co/samredjr" target="_blank" rel="noopener noreferrer">Hugging Face</a>
+                <a href="https://civitai.com/user/callux" target="_blank" rel="noopener noreferrer">Civitai</a>
+            </nav>
         </div>
     </footer>
 
-    <!-- Scroll to Top Button -->
-    <button id="scroll-to-top" class="scroll-to-top" aria-label="Scroll to top">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 15l-6-6-6 6"/>
+    <button class="to-top" id="to-top" type="button" aria-label="Back to top" title="Back to top">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 19V5M5 12l7-7 7 7"></path>
         </svg>
     </button>
 
-    <script src="main.js" defer></script>
+    <script src="main.js?v=2" defer></script>
 </body>
+
 </html>
