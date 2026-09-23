@@ -30,6 +30,7 @@ const RECENT_MODELS = [
    Anything not listed here is appended alphabetically. */
 const CATEGORY_ORDER = [
     'Character & Portraits',
+    'Brown Woman',
     'Anime & Fantasy',
     'Sci-Fi & Cyberpunk',
     'Art Styles & Techniques',
@@ -91,7 +92,7 @@ function prepare(models) {
         return Object.assign({}, model, {
             tags,
             category: model.category || 'Uncategorized',
-            haystack: [model.name, model.category, tags.join(' ')].join(' ').toLowerCase()
+            haystack: [model.name, model.slug, model.category, tags.join(' ')].join(' ').toLowerCase()
         });
     });
 }
