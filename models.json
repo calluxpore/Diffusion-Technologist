@@ -169,6 +169,13 @@
     "tags": ["SD1"]
   },
   {
+    "name": "Face Tattoos",
+    "slug": "Face Tat",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.com/models/2958180/face-tattoos",
+    "tags": ["SDXL"]
+  },
+  {
     "name": "Fantasy City",
     "slug": "Fantasy City",
     "category": "Anime & Fantasy",
