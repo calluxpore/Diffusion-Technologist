@@ -26,17 +26,17 @@ const RECENT_MODELS = [
     'Impasto'
 ];
 
-/* Order categories by how a visitor is likely to browse, not alphabetically.
+/* Categories arranged alphabetically.
    Anything not listed here is appended alphabetically. */
 const CATEGORY_ORDER = [
-    'Character & Portraits',
-    'Brown Woman',
     'Anime & Fantasy',
-    'Sci-Fi & Cyberpunk',
+    'Architecture',
     'Art Styles & Techniques',
+    'Brown Woman',
+    'Character & Portraits',
     'Fashion',
     'Industrial Design',
-    'Architecture',
+    'Sci-Fi & Cyberpunk',
     'Typography & Digital'
 ];
 
