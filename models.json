@@ -137,7 +137,7 @@
   {
     "name": "Brown Anime Portrait",
     "slug": "Brown Anime Portrait",
-    "category": "Brown Woman",
+    "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2192521/brown-anime-portrait",
     "tags": [
       "ZImage Turbo"
@@ -146,26 +146,8 @@
   {
     "name": "Brown Bob Portrait",
     "slug": "Brown Bob Portrait",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2152722/brown-bob-portrait",
-    "tags": [
-      "ZImage Turbo"
-    ]
-  },
-  {
-    "name": "Brown Boss Portrait",
-    "slug": "Brown Boss Portrait",
-    "category": "Brown Woman",
-    "civitaiUrl": "https://civitai.com/models/2208523/brown-boss-portrait",
-    "tags": [
-      "ZImage Turbo"
-    ]
-  },
-  {
-    "name": "Brown Braids",
-    "slug": "Brown Braids",
-    "category": "Brown Woman",
-    "civitaiUrl": "https://civitai.com/models/2273354/brown-braids",
     "tags": [
       "ZImage Turbo"
     ]
@@ -173,7 +155,7 @@
   {
     "name": "Brown Cyborg Lehenga",
     "slug": "Brown Cyborg Portrait",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2253916/brown-cyborg-lehenga",
     "tags": [
       "ZImage Turbo"
@@ -182,7 +164,7 @@
   {
     "name": "Brown Dark Academia Portrait",
     "slug": "Brown Dark Academia",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2261856/brown-dark-academia-portrait",
     "tags": [
       "ZImage Turbo"
@@ -191,17 +173,8 @@
   {
     "name": "Brown Gajra Portrait",
     "slug": "Brown Gajra Portrait",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2199024/brown-gajra-portrait",
-    "tags": [
-      "ZImage Turbo"
-    ]
-  },
-  {
-    "name": "Brown Influencer",
-    "slug": "Brown Influencer",
-    "category": "Brown Woman",
-    "civitaiUrl": "https://civitai.com/models/2272642/brown-influencer",
     "tags": [
       "ZImage Turbo"
     ]
@@ -209,7 +182,7 @@
   {
     "name": "Brown Pony Portrait",
     "slug": "Brown Pony Portrait",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2196362/brown-pony-portrait",
     "tags": [
       "ZImage Turbo"
@@ -218,7 +191,7 @@
   {
     "name": "Brown Tribal Fashion",
     "slug": "Brown Tribal Fashion",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2257051/brown-tribal-fashion",
     "tags": [
       "ZImage Turbo"
@@ -485,7 +458,7 @@
   {
     "name": "Naga Futures",
     "slug": "Naga Futures",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2256044/naga-futures",
     "tags": [
       "ZImage Turbo"
@@ -498,15 +471,6 @@
     "civitaiUrl": "https://civitai.com/models/1207829/neon-x-drive-lora",
     "tags": [
       "SD1"
-    ]
-  },
-  {
-    "name": "Operative",
-    "slug": "Operative",
-    "category": "Brown Woman",
-    "civitaiUrl": "https://civitai.com/models/2264752/operative",
-    "tags": [
-      "ZImage Turbo"
     ]
   },
   {
@@ -587,7 +551,7 @@
   {
     "name": "Sherpa",
     "slug": "Sherpa",
-    "category": "Brown Woman",
+    "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2262211/sherpa",
     "tags": [
       "ZImage Turbo"

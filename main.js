@@ -32,7 +32,6 @@ const CATEGORY_ORDER = [
     'Anime & Fantasy',
     'Architecture',
     'Art Styles & Techniques',
-    'Brown Woman',
     'Character & Portraits',
     'Fashion',
     'Industrial Design',
