@@ -15,13 +15,12 @@ const RECENT = 'Most Recent';
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
 const RECENT_MODELS = [
+    'Namos',
     'Face Tattoos',
     'The Iron Warden',
-    'Joy Potter',
     'Industrial Design Anima Style Rendering',
     'HeptapodB',
     'Anbui',
-    'Anfema',
     'Hallucination',
     'Impasto'
 ];

@@ -32,7 +32,7 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2248937/amazon",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -41,7 +41,7 @@
     "category": "Architecture",
     "civitaiUrl": "https://civitai.com/models/2634747/anbui",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -50,7 +50,7 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2632422/anfema",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -59,7 +59,7 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2214415/anime-style-variant",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -140,7 +140,7 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2192521/brown-anime-portrait",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -149,7 +149,7 @@
     "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2152722/brown-bob-portrait",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -259,7 +259,7 @@
     "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2244760/future-fashion",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -296,7 +296,7 @@
     "category": "Art Styles & Techniques",
     "civitaiUrl": "https://civitai.com/models/2546958/hallucination",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -305,7 +305,7 @@
     "category": "Sci-Fi & Cyberpunk",
     "civitaiUrl": "https://civitai.com/models/2644591/heptapod-b-look-alike?modelVersionId=2969479",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -323,7 +323,7 @@
     "category": "Art Styles & Techniques",
     "civitaiUrl": "https://civitai.com/models/2259570/impasto",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -332,7 +332,7 @@
     "category": "Industrial Design",
     "civitaiUrl": "https://civitai.com/models/808366/industrial-design-x-marker-rendering",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -341,7 +341,7 @@
     "category": "Industrial Design",
     "civitaiUrl": "https://civitai.com/models/808366/industrial-design-x-marker-rendering",
     "tags": [
-      "ZImage Turbo",
+      "ZIT",
       "Flux",
       "SD1"
     ]
@@ -361,7 +361,7 @@
     "category": "Art Styles & Techniques",
     "civitaiUrl": "https://civitai.com/models/2420808",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -370,7 +370,7 @@
     "category": "Anime & Fantasy",
     "civitaiUrl": "https://civitai.com/models/2721976/joy-potter",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -416,7 +416,16 @@
     "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2256044/naga-futures",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
+    ]
+  },
+  {
+    "name": "Namos",
+    "slug": "Namos",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "https://civitai.com/models/2967074/namos",
+    "tags": [
+      "SDXL"
     ]
   },
   {
@@ -435,7 +444,7 @@
     "civitaiUrl": "https://civitai.com/models/2382885?modelVersionId=2679665",
     "tags": [
       "ZImage",
-      "ZImage Turbo",
+      "ZIT",
       "Flux"
     ]
   },
@@ -500,7 +509,7 @@
     "category": "Sci-Fi & Cyberpunk",
     "civitaiUrl": "https://civitai.com/models/2226000/robot-illustration",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -509,7 +518,7 @@
     "category": "Fashion",
     "civitaiUrl": "https://civitai.com/models/2262211/sherpa",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -527,7 +536,7 @@
     "category": "Sci-Fi & Cyberpunk",
     "civitaiUrl": "https://civitai.com/models/2251241/space-marine",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -545,7 +554,7 @@
     "category": "Character & Portraits",
     "civitaiUrl": "https://civitai.com/models/2251592/spider-gwen",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -600,7 +609,7 @@
     "category": "Sci-Fi & Cyberpunk",
     "civitaiUrl": "https://civitai.com/models/2724891/the-iron-warden",
     "tags": [
-      "Anima V1"
+      "Anima"
     ]
   },
   {
@@ -609,7 +618,7 @@
     "category": "Character & Portraits",
     "civitaiUrl": "https://civitai.com/models/2249804/varang",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
@@ -627,7 +636,7 @@
     "category": "Architecture",
     "civitaiUrl": "https://civitai.com/models/2269821/whimsical",
     "tags": [
-      "ZImage Turbo"
+      "ZIT"
     ]
   },
   {
