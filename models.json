@@ -272,6 +272,15 @@
     ]
   },
   {
+    "name": "Grook",
+    "slug": "Grook",
+    "category": "Anime & Fantasy",
+    "civitaiUrl": "",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Hades",
     "slug": "Hades",
     "category": "Anime & Fantasy",

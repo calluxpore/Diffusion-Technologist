@@ -15,6 +15,7 @@ const RECENT = 'Most Recent';
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
 const RECENT_MODELS = [
+    'Grook',
     'Namos',
     'Face Tattoos',
     'The Iron Warden',
@@ -226,6 +227,8 @@ function createCard(model, index) {
         card.target = '_blank';
         card.rel = 'noopener noreferrer';
         card.setAttribute('aria-label', `${model.name} — open on Civitai`);
+    } else {
+        card.setAttribute('aria-label', model.name);
     }
     reveal(card, index);
 
