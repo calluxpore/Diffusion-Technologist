@@ -5,6 +5,142 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. FONTS
+   Local typography matching portfolio-5208db.webflow.io:
+   - Atkinson Hyperlegible (regular + bold) for content & interface
+   - MonoLisa (regular + bold) for code, technical tags, and hero brand title
+   -------------------------------------------------------------------------- */
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("Fonts/Atkinson-Hyperlegible-Regular-102.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("Fonts/Atkinson-Hyperlegible-Regular-102.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("Fonts/Atkinson-Hyperlegible-Bold-102.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("Fonts/Atkinson-Hyperlegible-Bold-102.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Alias: Atkinson Hyperlegible 102 */
+@font-face {
+    font-family: "Atkinson Hyperlegible 102";
+    src: url("Fonts/Atkinson-Hyperlegible-Regular-102.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible 102";
+    src: url("Fonts/Atkinson-Hyperlegible-Regular-102.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible 102";
+    src: url("Fonts/Atkinson-Hyperlegible-Bold-102.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible 102";
+    src: url("Fonts/Atkinson-Hyperlegible-Bold-102.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MonoLisa";
+    src: url("Fonts/MonoLisa-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MonoLisa";
+    src: url("Fonts/MonoLisa-Regular.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MonoLisa";
+    src: url("Fonts/MonoLisa-Bold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MonoLisa";
+    src: url("Fonts/MonoLisa-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Alias: Monolisa */
+@font-face {
+    font-family: "Monolisa";
+    src: url("Fonts/MonoLisa-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Monolisa";
+    src: url("Fonts/MonoLisa-Regular.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Monolisa";
+    src: url("Fonts/MonoLisa-Bold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Monolisa";
+    src: url("Fonts/MonoLisa-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
    1. TOKENS
    -------------------------------------------------------------------------- */
 :root {
@@ -37,8 +173,9 @@
     --shadow-lg: 0 12px 34px -18px rgba(28, 26, 23, 0.34);
 
     /* Type */
-    --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
-    --font-mono: "JetBrains Mono", ui-monospace, Consolas, Monaco, monospace;
+    --font-sans: "Atkinson Hyperlegible", "Atkinson Hyperlegible 102", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-serif: var(--font-sans);
+    --font-mono: "MonoLisa", "Monolisa", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     /* Metrics */
     --max-width: 1360px;
@@ -100,9 +237,9 @@ body {
     flex-direction: column;
     background: var(--bg);
     color: var(--text);
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1.02rem;
-    line-height: 1.68;
+    line-height: 1.62;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -112,8 +249,8 @@ body {
 h1,
 h2,
 h3 {
-    font-family: var(--font-serif);
-    font-weight: 500;
+    font-family: var(--font-sans);
+    font-weight: 700;
     line-height: 1.18;
     letter-spacing: -0.012em;
     text-wrap: balance;
@@ -260,9 +397,9 @@ img {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1.02rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--text);
     text-decoration: none;
@@ -366,18 +503,19 @@ img {
 
 .hero-title {
     margin: 0.7rem 0 0;
+    font-family: var(--font-mono);
     font-size: clamp(2.3rem, 5.4vw, 4rem);
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.02;
+    letter-spacing: -0.02em;
 }
 
 .hero-subtitle {
     margin: 0.85rem 0 1.3rem;
     max-width: 60ch;
     font-size: clamp(1.05rem, 1.9vw, 1.32rem);
-    line-height: 1.42;
+    line-height: 1.45;
     color: var(--text-muted);
-    font-style: italic;
 }
 
 .hero-note {
@@ -673,7 +811,6 @@ main {
     padding: 4rem 0;
     text-align: center;
     color: var(--text-muted);
-    font-style: italic;
 }
 
 .state[hidden] {
@@ -708,8 +845,9 @@ main {
 }
 
 .category-title {
+    font-family: var(--font-sans);
     font-size: clamp(1.25rem, 2.4vw, 1.6rem);
-    font-weight: 500;
+    font-weight: 700;
 }
 
 .category-count {
@@ -892,9 +1030,9 @@ main {
 }
 
 .card-title {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1.05rem;
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.01em;
     color: var(--text);
