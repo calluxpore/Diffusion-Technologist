@@ -640,6 +640,24 @@
     ]
   },
   {
+    "name": "Voronoi",
+    "slug": "voronoi",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.red/models/3004897/voronoi",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
+    "name": "Voronoi ID",
+    "slug": "voronoi ID",
+    "category": "Industrial Design",
+    "civitaiUrl": "https://civitai.red/models/3004897/voronoi",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Warrior X Monk",
     "slug": "Warrior X Monk",
     "category": "Anime & Fantasy",
