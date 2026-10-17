@@ -622,6 +622,15 @@
     ]
   },
   {
+    "name": "Temporal Shift",
+    "slug": "Temporal Shift",
+    "category": "Art Styles & Techniques",
+    "civitaiUrl": "https://civitai.red/models/3005918/temporal-shift",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "The Iron Warden",
     "slug": "The Iron Warden",
     "category": "Sci-Fi & Cyberpunk",
