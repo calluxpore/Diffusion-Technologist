@@ -47,6 +47,27 @@ const FAVOURITE_MODELS = [
     'Devanagari X Graffiti'
 ];
 
+const FAVOURITE_SET = new Set(FAVOURITE_MODELS);
+const inFavourites = model => FAVOURITE_SET.has(model.name);
+
+/** FAVOURITES is a virtual category: membership is the curated list, not model.category. */
+const inCategory = (model, category) =>
+    category === FAVOURITES ? inFavourites(model) : model.category === category;
+
+function createHeartIcon(className, size) {
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const icon = document.createElementNS(svgNs, 'svg');
+    icon.setAttribute('class', className);
+    icon.setAttribute('viewBox', '0 0 24 24');
+    icon.setAttribute('width', String(size));
+    icon.setAttribute('height', String(size));
+    icon.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(svgNs, 'path');
+    path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+    icon.appendChild(path);
+    return icon;
+}
+
 /* Categories arranged alphabetically.
    Anything not listed here is appended alphabetically. */
 const CATEGORY_ORDER = [
@@ -352,18 +373,7 @@ function createSection(title, models) {
     const heading = document.createElement('h2');
     heading.className = 'category-title';
     heading.textContent = title;
-    if (title === FAVOURITES) {
-        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        icon.setAttribute('class', 'category-icon');
-        icon.setAttribute('viewBox', '0 0 24 24');
-        icon.setAttribute('width', '20');
-        icon.setAttribute('height', '20');
-        icon.setAttribute('aria-hidden', 'true');
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-        icon.appendChild(path);
-        heading.prepend(icon);
-    }
+    if (title === FAVOURITES) heading.prepend(createHeartIcon('category-icon', 20));
 
     const count = document.createElement('span');
     count.className = 'category-count';
@@ -391,7 +401,7 @@ function slugify(value) {
  * axis, which is how each chip reports what it would yield if it were clicked.
  */
 function matches(model, ignore) {
-    if (ignore !== 'category' && state.category !== ALL && model.category !== state.category) return false;
+    if (ignore !== 'category' && state.category !== ALL && !inCategory(model, state.category)) return false;
     if (ignore !== 'base' && state.base !== ALL && !model.tags.includes(state.base)) return false;
     if (state.query && !model.haystack.includes(state.query)) return false;
     return true;
@@ -432,10 +442,18 @@ function render() {
         }
     }
 
-    orderedCategories(visible).forEach(category => {
-        const models = visible.filter(model => model.category === category);
-        if (models.length) fragment.appendChild(createSection(category, models));
-    });
+    if (state.category === FAVOURITES) {
+        // Keep the curated order rather than regrouping by real category.
+        const ordered = FAVOURITE_MODELS
+            .map(name => visible.find(model => model.name === name))
+            .filter(Boolean);
+        fragment.appendChild(createSection(FAVOURITES, ordered));
+    } else {
+        orderedCategories(visible).forEach(category => {
+            const models = visible.filter(model => model.category === category);
+            if (models.length) fragment.appendChild(createSection(category, models));
+        });
+    }
 
     el.grid.appendChild(fragment);
     updateChrome(visible.length);
@@ -456,7 +474,7 @@ function updateChrome(count) {
     const byBase = allModels.filter(model => matches(model, 'base'));
 
     refreshChips(el.categoryFilters, state.category, value =>
-        value === ALL ? byCategory.length : byCategory.filter(m => m.category === value).length);
+        value === ALL ? byCategory.length : byCategory.filter(m => inCategory(m, value)).length);
 
     refreshChips(el.baseFilters, state.base, value =>
         value === ALL ? byBase.length : byBase.filter(m => m.tags.includes(value)).length);
@@ -489,6 +507,8 @@ function createChip(label, value, count) {
     chip.dataset.value = value;
     chip.setAttribute('aria-pressed', 'false');
 
+    if (value === FAVOURITES) chip.appendChild(createHeartIcon('chip-icon', 12));
+
     const text = document.createElement('span');
     text.textContent = label;
     chip.appendChild(text);
@@ -506,6 +526,8 @@ function createChip(label, value, count) {
 function buildFilters(models) {
     const categoryFragment = document.createDocumentFragment();
     categoryFragment.appendChild(createChip('All', ALL, models.length));
+    // A virtual category: the curated favourites, listed right after "All".
+    categoryFragment.appendChild(createChip(FAVOURITES, FAVOURITES, models.filter(inFavourites).length));
     orderedCategories(models).forEach(category => {
         const count = models.filter(model => model.category === category).length;
         categoryFragment.appendChild(createChip(category, category, count));
@@ -614,7 +636,7 @@ function readUrl(models) {
     const params = new URLSearchParams(location.search);
 
     const category = params.get('category');
-    if (category && models.some(model => model.category === category)) {
+    if (category && (category === FAVOURITES || models.some(model => model.category === category))) {
         state.category = category;
     }
 

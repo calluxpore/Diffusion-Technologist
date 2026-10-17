@@ -788,6 +788,15 @@ img {
     color: var(--on-accent);
 }
 
+.chip-icon {
+    flex-shrink: 0;
+    fill: #e5484d;
+}
+
+.chip[aria-pressed="true"] .chip-icon {
+    fill: currentColor;
+}
+
 /* Would return nothing alongside the other active filters. */
 .chip.is-empty {
     opacity: 0.4;
