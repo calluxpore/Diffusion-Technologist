@@ -11,6 +11,7 @@
 
 const ALL = '__all__';
 const RECENT = 'Most Recent';
+const FAVOURITES = 'My Favourites';
 
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
@@ -27,6 +28,23 @@ const RECENT_MODELS = [
     'Anbui',
     'Hallucination',
     'Impasto'
+];
+
+/* Curated favourites shelf, shown directly below Most Recent. Names must match models.json. */
+const FAVOURITE_MODELS = [
+    'Industrial Design Anima Style Rendering',
+    'HeptapodB',
+    'Hallucination',
+    'Brown Anime Portrait',
+    'Journal Sketching',
+    'Brown Bob Portrait',
+    'Industrial Design X Marker Rendering',
+    'Industrial Design X Sketch',
+    'Cyberpunk X Robot',
+    'Alien X Dravuun',
+    'Alien X Zynthar',
+    'Steampunk X Skull Mask',
+    'Devanagari X Graffiti'
 ];
 
 /* Categories arranged alphabetically.
@@ -334,6 +352,18 @@ function createSection(title, models) {
     const heading = document.createElement('h2');
     heading.className = 'category-title';
     heading.textContent = title;
+    if (title === FAVOURITES) {
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        icon.setAttribute('class', 'category-icon');
+        icon.setAttribute('viewBox', '0 0 24 24');
+        icon.setAttribute('width', '20');
+        icon.setAttribute('height', '20');
+        icon.setAttribute('aria-hidden', 'true');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+        icon.appendChild(path);
+        heading.prepend(icon);
+    }
 
     const count = document.createElement('span');
     count.className = 'category-count';
@@ -393,6 +423,12 @@ function render() {
             .filter(Boolean);
         if (recent.length) {
             fragment.appendChild(createSection(RECENT, recent));
+        }
+        const favourites = FAVOURITE_MODELS
+            .map(name => allModels.find(model => model.name === name))
+            .filter(Boolean);
+        if (favourites.length) {
+            fragment.appendChild(createSection(FAVOURITES, favourites));
         }
     }
 
