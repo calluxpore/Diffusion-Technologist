@@ -23,7 +23,7 @@
     <link rel="preload" href="Fonts/Atkinson-Hyperlegible-Bold-102.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="Fonts/MonoLisa-Regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="Fonts/MonoLisa-Bold.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=10">
 
     <script>
         // Applied before first paint so the page never flashes the wrong theme.
@@ -93,55 +93,77 @@
                         synthetically generated.</span>
                 </div>
 
-                <p class="hero-description">
-                    I'm Sam — a creative technologist and designer bridging deep professional practice with
-                    advanced AI and computational design. I develop high-fidelity models at the intersection of
-                    culture, art and design, using sophisticated visualization techniques, and I bring a
-                    background from OCAD University and Coventry to the generative art community.
-                </p>
-
                 <div class="hero-actions">
                     <a class="btn plain" href="#models">Browse the archive</a>
                     <a class="btn btn-ghost plain" href="https://civitai.com/user/callux" target="_blank"
                         rel="noopener noreferrer">Civitai profile &#8599;</a>
                 </div>
             </div>
+
+            <!-- Filled with recent posters once models.json loads; desktop only. -->
+            <div class="hero-mosaic" id="hero-mosaic" aria-hidden="true"></div>
         </div>
     </section>
 
     <div class="toolbar" id="toolbar">
         <div class="container toolbar-inner">
-            <div class="search">
-                <span class="search-icon" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round">
-                        <circle cx="11" cy="11" r="7"></circle>
-                        <path d="m20 20-3.5-3.5"></path>
-                    </svg>
-                </span>
-                <label class="visually-hidden" for="search-input">Search models</label>
-                <input id="search-input" type="search" placeholder="Search models, categories, base models…"
-                    autocomplete="off" spellcheck="false">
-                <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                        <path d="M18 6 6 18M6 6l12 12"></path>
-                    </svg>
-                </button>
-                <kbd class="search-hint">/</kbd>
+            <div class="toolbar-row">
+                <label class="filter-label search-label" for="search-input">Search</label>
+                <div class="search-controls">
+                    <div class="search">
+                        <span class="search-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <path d="m20 20-3.5-3.5"></path>
+                            </svg>
+                        </span>
+                        <input id="search-input" type="search" placeholder="Search models, categories, base models…"
+                            autocomplete="off" spellcheck="false">
+                        <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M18 6 6 18M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <kbd class="search-hint">/</kbd>
+                    </div>
+
+                    <button class="reset-filters" id="reset-filters" type="button" disabled>Reset</button>
+
+                    <!-- Phones and tablets fold the chips behind this; desktop shows them inline. -->
+                    <button class="filters-toggle" id="filters-toggle" type="button" aria-expanded="false"
+                        aria-controls="filter-panel">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"></path>
+                            <circle cx="16" cy="6" r="2"></circle>
+                            <circle cx="10" cy="12" r="2"></circle>
+                            <circle cx="18" cy="18" r="2"></circle>
+                        </svg>
+                        Filters
+                        <span class="filters-toggle-count" id="filters-toggle-count" hidden></span>
+                    </button>
+                </div>
             </div>
 
-            <div class="filter-group" id="base-filters" role="group" aria-label="Filter by base model">
-                <span class="filter-label">Base</span>
-            </div>
+            <div class="filter-panel" id="filter-panel">
+                <div class="filter-group" id="base-filters" role="group" aria-label="Filter by base model">
+                    <span class="filter-label">Base</span>
+                    <div class="chip-list"></div>
+                </div>
 
-            <div class="filter-group" id="category-filters" role="group" aria-label="Filter by category">
-                <span class="filter-label">Category</span>
+                <div class="filter-group" id="category-filters" role="group" aria-label="Filter by category">
+                    <span class="filter-label">Category</span>
+                    <div class="chip-list"></div>
+                </div>
+
+                <!-- The narrow-screen home for Reset, which would crowd the search row there. -->
+                <button class="reset-filters panel-reset" id="panel-reset" type="button" disabled>Reset all</button>
             </div>
 
             <!-- Kept for screen readers so filtering still announces its result. -->
             <p class="result-count visually-hidden" id="result-count" role="status" aria-live="polite"></p>
-            <button class="reset-filters" id="reset-filters" type="button" hidden>Reset</button>
         </div>
     </div>
 
@@ -158,7 +180,14 @@
 
     <footer class="footer">
         <div class="footer-inner">
-            <div>
+            <div class="footer-about">
+                <p class="eyebrow">About</p>
+                <p class="footer-bio">
+                    I'm Sam — a creative technologist and designer bridging deep professional practice with
+                    advanced AI and computational design. I develop high-fidelity models at the intersection of
+                    culture, art and design, using sophisticated visualization techniques, and I bring a
+                    background from OCAD University and Coventry to the generative art community.
+                </p>
                 <p>Feel free to reach out — let's connect and create something exceptional together.</p>
                 <p class="footer-meta">&copy; 2026 Samarth Reddy &middot; All models open source, free forever</p>
             </div>
@@ -182,7 +211,7 @@
         </svg>
     </button>
 
-    <script src="main.js?v=4" defer></script>
+    <script src="main.js?v=8" defer></script>
 </body>
 
 </html>

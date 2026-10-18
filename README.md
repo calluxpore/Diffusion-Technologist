@@ -15,9 +15,16 @@ with JetBrains Mono for the interface chrome.
 - **Filter** by category and by base model, with live counts that update against the other
   active filter so dead-end combinations are visible before you click them
 - **Shareable URLs** — every search and filter is reflected in the query string
-- Category sections with counts, plus a "Most Recent" shelf
-- Model cards with a static poster and a video preview that only downloads once the card
-  approaches the viewport
+- A hero mosaic of the newest posters, so the page opens on the work itself
+- Category sections with counts, plus "Most Recent" and "My Favourites" shelves that scroll
+  sideways in a single row (arrow buttons with a mouse, swipe on touch)
+- A compact pinned toolbar: search and filters inline on desktop, with the chips folded behind a
+  Filters button on phones and tablets
+- Model cards with a static poster and a video preview that plays on hover with a mouse, or while
+  the card is mostly on screen on touch devices. Each `.mp4` downloads only the first time it is
+  wanted, and Data Saver or reduced motion keep to posters
+- Base-model tags get readable names in the UI (`ZIT` → Z-Image Turbo) via `BASE_LABELS` in
+  `main.js`; the raw tag stays in `models.json` and in URLs
 - Cards are real links, so middle-click and open-in-new-tab work as expected
 - Smooth scrolling, with cards and section headers easing into view as you reach them
 - Light/dark theme that follows the system by default and remembers an explicit choice

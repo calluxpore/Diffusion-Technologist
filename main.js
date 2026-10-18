@@ -81,7 +81,29 @@ const CATEGORY_ORDER = [
     'Typography & Digital'
 ];
 
+/* Display names for base-model tags. The raw tag stays in models.json and in
+   shareable URLs; anything not listed here is shown as-is. */
+const BASE_LABELS = {
+    ZIT: 'Z-Image Turbo',
+    ZImage: 'Z-Image'
+};
+
+const baseLabel = tag => BASE_LABELS[tag] || tag;
+
+/* Curated posters for the hero mosaic, in reading order (three per row).
+   Names must match models.json; anything missing is skipped. */
+const MOSAIC_MODELS = [
+    'Industrial Design Anima Style Rendering',
+    'HeptapodB',
+    'Hallucination',
+    'Bird X Human',
+    'Exclusion',
+    'Neon X Drive'
+];
+
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+const saveData = Boolean(navigator.connection && navigator.connection.saveData);
 
 /* --------------------------------------------------------------------------
    DOM
@@ -96,11 +118,16 @@ const el = {
     searchClear: document.getElementById('search-clear'),
     resultCount: document.getElementById('result-count'),
     resetFilters: document.getElementById('reset-filters'),
+    panelReset: document.getElementById('panel-reset'),
     emptyReset: document.getElementById('empty-reset'),
     categoryFilters: document.getElementById('category-filters'),
     baseFilters: document.getElementById('base-filters'),
     progressBar: document.getElementById('progress-bar'),
-    toTop: document.getElementById('to-top')
+    toTop: document.getElementById('to-top'),
+    toolbar: document.getElementById('toolbar'),
+    filtersToggle: document.getElementById('filters-toggle'),
+    filtersCount: document.getElementById('filters-toggle-count'),
+    mosaic: document.getElementById('hero-mosaic')
 };
 
 /* --------------------------------------------------------------------------
@@ -133,7 +160,8 @@ function prepare(models) {
         return Object.assign({}, model, {
             tags,
             category: model.category || 'Uncategorized',
-            haystack: [model.name, model.slug, model.category, tags.join(' ')].join(' ').toLowerCase()
+            haystack: [model.name, model.slug, model.category, tags.join(' '), tags.map(baseLabel).join(' ')]
+                .join(' ').toLowerCase()
         });
     });
 }
@@ -154,32 +182,53 @@ function orderedBases(models) {
 }
 
 /* --------------------------------------------------------------------------
-   Video: only fetch an .mp4 once its card is near the viewport
+   Video: previews play on hover with a mouse, or while a card is mostly in
+   view on touch screens. An .mp4 is only fetched the first time it is wanted.
    -------------------------------------------------------------------------- */
+
+const AUTOPLAY_RATIO = 0.6;
+
+/* Touch screens have no hover, so a card plays once it is mostly on screen.
+   Data saver and reduced motion keep to posters. */
+const autoplayOnScroll = () => !canHover.matches && !saveData && !prefersReducedMotion.matches;
 
 const videoObserver = 'IntersectionObserver' in window
     ? new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            const video = entry.target;
-            if (entry.isIntersecting) {
-                if (!video.src && video.dataset.src) {
-                    video.src = video.dataset.src;
-                }
-                playVideo(video);
-            } else if (!video.paused) {
-                video.pause();
+            if (entry.intersectionRatio >= AUTOPLAY_RATIO) {
+                startVideo(entry.target);
+            } else {
+                stopVideo(entry.target);
             }
         });
-    }, { rootMargin: '250px 0px', threshold: 0.05 })
+    }, { threshold: [0, AUTOPLAY_RATIO] })
     : null;
 
+function startVideo(video) {
+    if (video.dataset.failed === 'true') return;
+    video.dataset.wanted = 'true';
+    if (!video.src && video.dataset.src) {
+        video.src = video.dataset.src;
+    }
+    playVideo(video);
+}
+
+function stopVideo(video) {
+    video.dataset.wanted = 'false';
+    video.classList.remove('is-playing');
+    if (!video.paused) video.pause();
+}
+
 function playVideo(video) {
-    if (!video.src || video.dataset.failed === 'true') return;
+    // A slow download can finish after the pointer has already left the card.
+    if (!video.src || video.dataset.failed === 'true' || video.dataset.wanted !== 'true') return;
     const attempt = video.play();
     if (attempt && typeof attempt.then === 'function') {
         // Autoplay can be refused (iOS Low Power Mode, data saver); the poster
         // stays visible underneath, so a rejection needs no handling.
-        attempt.then(() => video.classList.add('is-playing')).catch(() => { });
+        attempt.then(() => {
+            if (video.dataset.wanted === 'true') video.classList.add('is-playing');
+        }).catch(() => { });
     }
 }
 
@@ -259,7 +308,11 @@ function reveal(element, stagger) {
    Rendering
    -------------------------------------------------------------------------- */
 
-function createCard(model, index) {
+/**
+ * @param {boolean} showCategory only where cards from several categories sit
+ *   together; inside a category section the heading already says it.
+ */
+function createCard(model, index, showCategory) {
     // An anchor (rather than a click handler) so cards support middle-click,
     // open-in-new-tab and copy-link like any other link.
     const card = document.createElement('a');
@@ -312,10 +365,13 @@ function createCard(model, index) {
 
     const video = createVideo(videoPath, posterPath);
     media.appendChild(video);
-    if (videoObserver) {
+    if (canHover.matches) {
+        card.addEventListener('mouseenter', () => startVideo(video));
+        card.addEventListener('mouseleave', () => stopVideo(video));
+        card.addEventListener('focus', () => startVideo(video));
+        card.addEventListener('blur', () => stopVideo(video));
+    } else if (videoObserver && autoplayOnScroll()) {
         videoObserver.observe(video);
-    } else {
-        video.src = videoPath;
     }
 
     // A model can target several bases, so every one gets its own badge. The base
@@ -330,7 +386,7 @@ function createCard(model, index) {
         ordered.forEach(tag => {
             const badge = document.createElement('span');
             badge.className = 'card-badge';
-            badge.textContent = tag;
+            badge.textContent = baseLabel(tag);
             badges.appendChild(badge);
         });
         media.appendChild(badges);
@@ -351,20 +407,28 @@ function createCard(model, index) {
     title.textContent = model.name;
     body.appendChild(title);
 
-    const meta = document.createElement('p');
-    meta.className = 'card-meta';
-    // Bases live in the badges now, so the meta line carries only the category.
-    meta.textContent = model.category;
-    body.appendChild(meta);
+    if (showCategory) {
+        const meta = document.createElement('p');
+        meta.className = 'card-meta';
+        // Bases live in the badges, so the meta line carries only the category.
+        meta.textContent = model.category;
+        body.appendChild(meta);
+    }
 
     card.appendChild(media);
     card.appendChild(body);
     return card;
 }
 
-function createSection(title, models) {
+/**
+ * @param {object} [options]
+ * @param {boolean} [options.shelf] one sideways-scrolling row instead of a grid.
+ * @param {boolean} [options.showCategory] label each card with its category.
+ * @param {Function} [options.onSeeAll] adds a "See all" button that calls this.
+ */
+function createSection(title, models, options = {}) {
     const section = document.createElement('section');
-    section.className = 'category-section';
+    section.className = options.shelf ? 'category-section is-shelf' : 'category-section';
 
     const header = document.createElement('div');
     header.className = 'category-header';
@@ -386,10 +450,69 @@ function createSection(title, models) {
 
     const grid = document.createElement('div');
     grid.className = 'category-grid';
-    models.forEach((model, index) => grid.appendChild(createCard(model, index)));
+    models.forEach((model, index) => grid.appendChild(createCard(model, index, options.showCategory)));
     section.appendChild(grid);
 
+    if (options.shelf) header.appendChild(createShelfNav(grid, title, options.onSeeAll));
+
     return section;
+}
+
+/* --------------------------------------------------------------------------
+   Shelves: arrow buttons that page a sideways row, disabled at either end
+   -------------------------------------------------------------------------- */
+
+const shelfUpdaters = [];
+
+function createShelfNav(grid, title, onSeeAll) {
+    const nav = document.createElement('div');
+    nav.className = 'shelf-nav';
+
+    if (onSeeAll) {
+        const seeAll = document.createElement('button');
+        seeAll.type = 'button';
+        seeAll.className = 'shelf-see-all';
+        seeAll.textContent = 'See all';
+        seeAll.setAttribute('aria-label', `See all of ${title}`);
+        seeAll.addEventListener('click', onSeeAll);
+        nav.appendChild(seeAll);
+    }
+
+    const arrow = (direction, label, path) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'icon-btn';
+        button.setAttribute('aria-label', `${label}: ${title}`);
+        button.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="${path}"></path></svg>`;
+        button.addEventListener('click', () => {
+            grid.scrollBy({
+                left: direction * grid.clientWidth * 0.9,
+                behavior: prefersReducedMotion.matches ? 'auto' : 'smooth'
+            });
+        });
+        nav.appendChild(button);
+        return button;
+    };
+
+    const prev = arrow(-1, 'Scroll back', 'M15 18l-6-6 6-6');
+    const next = arrow(1, 'Scroll forward', 'M9 18l6-6-6-6');
+
+    const update = () => {
+        const max = grid.scrollWidth - grid.clientWidth;
+        prev.disabled = grid.scrollLeft <= 1;
+        next.disabled = grid.scrollLeft >= max - 1;
+    };
+    grid.addEventListener('scroll', update, { passive: true });
+    shelfUpdaters.push(update);
+
+    return nav;
+}
+
+/** Shelf arrows can only be sized once the shelf is laid out on the page. */
+function refreshShelves() {
+    shelfUpdaters.forEach(update => update());
 }
 
 function slugify(value) {
@@ -413,6 +536,7 @@ function render() {
     // Cards are rebuilt on every render, so drop the observers' stale targets.
     if (videoObserver) videoObserver.disconnect();
     if (revealObserver) revealObserver.disconnect();
+    shelfUpdaters.length = 0;
     el.grid.replaceChildren();
 
     if (!visible.length) {
@@ -432,13 +556,17 @@ function render() {
             .map(name => allModels.find(model => model.name === name))
             .filter(Boolean);
         if (recent.length) {
-            fragment.appendChild(createSection(RECENT, recent));
+            fragment.appendChild(createSection(RECENT, recent, { shelf: true, showCategory: true }));
         }
         const favourites = FAVOURITE_MODELS
             .map(name => allModels.find(model => model.name === name))
             .filter(Boolean);
         if (favourites.length) {
-            fragment.appendChild(createSection(FAVOURITES, favourites));
+            fragment.appendChild(createSection(FAVOURITES, favourites, {
+                shelf: true,
+                showCategory: true,
+                onSeeAll: () => applyFilter('category', FAVOURITES)
+            }));
         }
     }
 
@@ -447,7 +575,7 @@ function render() {
         const ordered = FAVOURITE_MODELS
             .map(name => visible.find(model => model.name === name))
             .filter(Boolean);
-        fragment.appendChild(createSection(FAVOURITES, ordered));
+        fragment.appendChild(createSection(FAVOURITES, ordered, { showCategory: true }));
     } else {
         orderedCategories(visible).forEach(category => {
             const models = visible.filter(model => model.category === category);
@@ -456,6 +584,7 @@ function render() {
     }
 
     el.grid.appendChild(fragment);
+    refreshShelves();
     updateChrome(visible.length);
 }
 
@@ -466,7 +595,14 @@ function updateChrome(count) {
         : `${count} of ${total} models`;
 
     const isFiltered = state.query !== '' || state.category !== ALL || state.base !== ALL;
-    el.resetFilters.hidden = !isFiltered;
+    // Always shown so the control never jumps in and out; disabled when there is nothing to clear.
+    el.resetFilters.disabled = !isFiltered;
+    el.panelReset.disabled = !isFiltered;
+
+    // Tells a phone user that chips are active even while the panel is folded.
+    const activeChips = (state.category !== ALL ? 1 : 0) + (state.base !== ALL ? 1 : 0);
+    el.filtersCount.hidden = activeChips === 0;
+    el.filtersCount.textContent = activeChips;
 
     // Each chip shows what it would yield against the *other* active filters, so
     // dead-end combinations are visible before they are clicked.
@@ -532,42 +668,96 @@ function buildFilters(models) {
         const count = models.filter(model => model.category === category).length;
         categoryFragment.appendChild(createChip(category, category, count));
     });
-    el.categoryFilters.appendChild(categoryFragment);
+    el.categoryFilters.querySelector('.chip-list').appendChild(categoryFragment);
 
     const baseFragment = document.createDocumentFragment();
     baseFragment.appendChild(createChip('All', ALL, models.length));
     orderedBases(models).forEach(([base, count]) => {
-        baseFragment.appendChild(createChip(base, base, count));
+        baseFragment.appendChild(createChip(baseLabel(base), base, count));
     });
-    el.baseFilters.appendChild(baseFragment);
+    el.baseFilters.querySelector('.chip-list').appendChild(baseFragment);
 
     el.categoryFilters.addEventListener('click', event => {
         const chip = event.target.closest('.chip');
-        if (!chip) return;
-        // Tapping the active chip clears it, which is faster than hunting for "All".
-        state.category = chip.dataset.value === state.category ? ALL : chip.dataset.value;
-        render();
-        scrollToResults();
+        if (chip) applyFilter('category', chip.dataset.value);
     });
 
     el.baseFilters.addEventListener('click', event => {
         const chip = event.target.closest('.chip');
-        if (!chip) return;
-        state.base = chip.dataset.value === state.base ? ALL : chip.dataset.value;
-        render();
-        scrollToResults();
+        if (chip) applyFilter('base', chip.dataset.value);
+    });
+}
+
+/** @param {'category'|'base'} axis */
+function applyFilter(axis, value) {
+    // Tapping the active chip clears it, which is faster than hunting for "All".
+    state[axis] = value === state[axis] ? ALL : value;
+    // Fold the phone panel first so the scroll below measures the short toolbar.
+    setFilterPanel(false);
+    render();
+    scrollToResults();
+}
+
+function setFilterPanel(open) {
+    el.toolbar.classList.toggle('is-open', open);
+    el.filtersToggle.setAttribute('aria-expanded', String(open));
+}
+
+function initFilterPanel() {
+    el.filtersToggle.addEventListener('click', () => {
+        setFilterPanel(!el.toolbar.classList.contains('is-open'));
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && el.toolbar.classList.contains('is-open')) {
+            setFilterPanel(false);
+            el.filtersToggle.focus();
+        }
+    });
+
+    // A tap anywhere outside the toolbar folds the panel away.
+    document.addEventListener('click', event => {
+        if (!el.toolbar.contains(event.target)) setFilterPanel(false);
+    });
+}
+
+/* --------------------------------------------------------------------------
+   Hero mosaic: hand-picked posters, as a preview of what lies below
+   -------------------------------------------------------------------------- */
+
+function buildMosaic(models) {
+    if (!el.mosaic) return;
+    const picks = MOSAIC_MODELS
+        .map(name => models.find(model => model.name === name))
+        .filter(Boolean);
+
+    picks.forEach((model, index) => {
+        const tile = document.createElement('div');
+        tile.className = 'hero-tile';
+        const img = document.createElement('img');
+        img.alt = '';
+        img.decoding = 'async';
+        img.style.transitionDelay = `${index * 70}ms`;
+        img.addEventListener('load', () => img.classList.add('is-loaded'));
+        img.addEventListener('error', () => tile.remove());
+        img.src = `media/${encodeURIComponent(model.slug)}.webp`;
+        tile.appendChild(img);
+        el.mosaic.appendChild(tile);
     });
 }
 
 
-/** Bring the results into view when a filter is applied from a scrolled-up position. */
+/**
+ * Bring the top of the results into view after a filter changes: down from the
+ * hero, or back up when the re-render has left the reader mid-way through.
+ */
 function scrollToResults() {
     const main = document.getElementById('models');
     const header = document.querySelector('.site-header');
     const toolbar = document.getElementById('toolbar');
     const offset = (header ? header.offsetHeight : 0) + (toolbar ? toolbar.offsetHeight : 0);
     const top = main.getBoundingClientRect().top + window.pageYOffset - offset - 8;
-    if (window.pageYOffset < top) {
+    if (Math.abs(window.pageYOffset - top) > 2) {
         window.scrollTo({ top, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
     }
 }
@@ -606,6 +796,10 @@ function initSearch() {
     };
 
     el.resetFilters.addEventListener('click', clearAll);
+    el.panelReset.addEventListener('click', () => {
+        setFilterPanel(false);
+        clearAll();
+    });
     if (el.emptyReset) el.emptyReset.addEventListener('click', clearAll);
 
     // "/" focuses search from anywhere on the page.
@@ -759,10 +953,13 @@ async function init() {
 
     el.loading.hidden = true;
 
+    buildMosaic(allModels);
     buildFilters(allModels);
+    initFilterPanel();
     initSearch();
     readUrl(allModels);
     render();
+    window.addEventListener('resize', refreshShelves, { passive: true });
 }
 
 if (document.readyState === 'loading') {
