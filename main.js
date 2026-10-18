@@ -96,7 +96,7 @@ const MOSAIC_MODELS = [
     'Industrial Design Anima Style Rendering',
     'HeptapodB',
     'Hallucination',
-    'Bird X Human',
+    'Journal Sketching',
     'Exclusion',
     'Neon X Drive'
 ];
