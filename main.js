@@ -16,6 +16,7 @@ const FAVOURITES = 'My Favourites';
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
 const RECENT_MODELS = [
+    'Old Me',
     'Temporal Shift',
     'Voronoi',
     'Halftone Orange',
