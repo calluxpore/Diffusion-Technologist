@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LoRA Archive — application logic
+   LoRA Archive: application logic
    Loads models.json, renders category sections, and drives search + filters.
    ========================================================================== */
 
@@ -16,6 +16,8 @@ const FAVOURITES = 'My Favourites';
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
 const RECENT_MODELS = [
+    'Messy Type',
+    'Meta Brown',
     'Old Me',
     'Temporal Shift',
     'Voronoi',
@@ -294,8 +296,8 @@ const revealObserver = 'IntersectionObserver' in window
  *   popping in as one block.
  */
 function reveal(element, stagger) {
-    // Without an observer, or with motion turned down, show it outright — never
-    // leave content stranded at opacity 0.
+    // Without an observer, or with motion turned down, show it outright, and
+    // never leave content stranded at opacity 0.
     if (!revealObserver || prefersReducedMotion.matches) {
         element.classList.add('reveal', 'in');
         return;
@@ -322,7 +324,7 @@ function createCard(model, index, showCategory) {
         card.href = model.civitaiUrl;
         card.target = '_blank';
         card.rel = 'noopener noreferrer';
-        card.setAttribute('aria-label', `${model.name} — open on Civitai`);
+        card.setAttribute('aria-label', `Open ${model.name} on Civitai`);
     } else {
         card.setAttribute('aria-label', model.name);
     }
@@ -347,8 +349,8 @@ function createCard(model, index, showCategory) {
     let retried = false;
     poster.addEventListener('error', () => {
         if (!retried) {
-            // A dropped request — a flaky connection, or one of 70-odd posters
-            // losing its turn — should not blank the card permanently.
+            // A dropped request (a flaky connection, or one of 70-odd posters
+            // losing its turn) should not blank the card permanently.
             retried = true;
             setTimeout(() => { poster.src = `${posterPath}?retry=1`; }, 700);
             return;

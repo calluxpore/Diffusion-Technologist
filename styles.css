@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LoRA Archive — Samarth Reddy
+   LoRA Archive: Samarth Reddy
    Design system aligned with calluxpore.github.io + Teaching-Portfolio
    (warm paper / burnt-sienna ink · near-black / amber ember)
    ========================================================================== */
@@ -590,14 +590,17 @@ img {
     gap: 0.6rem;
 }
 
-/* Civitai badges, one row of emblems. The columns shrink to keep all fourteen
-   on a single line; phones split them into two rows of seven. */
+/* Civitai badges, one row of emblems. Each badge gets its own column, which
+   shrinks so the whole set stays on one line however many there are; phones
+   split them into two rows. */
 .hero-badges {
     list-style: none;
     margin: 1.6rem 0 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(14, minmax(0, 44px));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 44px);
+    justify-content: start;
     gap: 0.4rem;
 }
 
@@ -620,7 +623,8 @@ img {
 
 @media (max-width: 600px) {
     .hero-badges {
-        grid-template-columns: repeat(7, minmax(0, 44px));
+        grid-auto-flow: row;
+        grid-template-columns: repeat(8, minmax(0, 44px));
         gap: 0.5rem 0.4rem;
     }
 }
@@ -1194,7 +1198,7 @@ main {
     transform: translateY(-3px);
 }
 
-/* Entrance motion — elements ease in as they scroll into view, rather than
+/* Entrance motion: elements ease in as they scroll into view, rather than
    animating on render where everything below the fold finishes unseen. */
 .reveal {
     opacity: 0;
@@ -1268,7 +1272,7 @@ main {
     background: linear-gradient(135deg, var(--bg-sunken), var(--card));
 }
 
-/* Base-model badges floating over the media — one per base the model targets. */
+/* Base-model badges floating over the media, one per base the model targets. */
 .card-badges {
     position: absolute;
     z-index: 4;

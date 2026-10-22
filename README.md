@@ -4,8 +4,8 @@ My personal portfolio for the LoRA models I have trained.
 
 Hosted on GitHub Pages and connected to my main website: https://portfolio-5208db.webflow.io/
 
-The visual language matches my other sites — [calluxpore.github.io](https://calluxpore.github.io/)
-and the [Teaching Portfolio](https://calluxpore.github.io/Teaching-Portfolio/) — sharing the same
+The visual language matches my other sites, [calluxpore.github.io](https://calluxpore.github.io/)
+and the [Teaching Portfolio](https://calluxpore.github.io/Teaching-Portfolio/), sharing the same
 warm-paper / burnt-sienna palette in light mode, near-black / amber in dark, set in Newsreader
 with JetBrains Mono for the interface chrome.
 
@@ -14,7 +14,7 @@ with JetBrains Mono for the interface chrome.
 - **Search** across model names, categories and base models (press `/` to jump to the field)
 - **Filter** by category and by base model, with live counts that update against the other
   active filter so dead-end combinations are visible before you click them
-- **Shareable URLs** — every search and filter is reflected in the query string
+- **Shareable URLs**: every search and filter is reflected in the query string
 - A hero mosaic of the newest posters, so the page opens on the work itself
 - Category sections with counts, plus "Most Recent" and "My Favourites" shelves that scroll
   sideways in a single row (arrow buttons with a mouse, swipe on touch)
@@ -38,7 +38,7 @@ with JetBrains Mono for the interface chrome.
 | `index.html` | Page structure |
 | `styles.css` | Design tokens and all styling |
 | `main.js` | Data loading, search, filtering, rendering, theme |
-| `models.json` | The model list — the only file to edit when publishing a new model |
+| `models.json` | The model list, and the only file to edit when publishing a new model |
 | `media/` | `<slug>.webp` poster and `<slug>.mp4` preview per model |
 | `badges/` | Civitai badge emblems (transparent WebP) shown under the hero buttons |
 

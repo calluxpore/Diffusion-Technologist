@@ -410,6 +410,24 @@
     ]
   },
   {
+    "name": "Messy Type",
+    "slug": "Messy Type",
+    "category": "Typography & Digital",
+    "civitaiUrl": "https://civitai.red/models/3014570/messy-type",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
+    "name": "Meta Brown",
+    "slug": "Meta Brown",
+    "category": "Character & Portraits",
+    "civitaiUrl": "https://civitai.red/models/3013338/meta-brown",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Metal X Mouse",
     "slug": "Metal X Mouse",
     "category": "Character & Portraits",
