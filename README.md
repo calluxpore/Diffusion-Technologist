@@ -40,6 +40,7 @@ with JetBrains Mono for the interface chrome.
 | `main.js` | Data loading, search, filtering, rendering, theme |
 | `models.json` | The model list — the only file to edit when publishing a new model |
 | `media/` | `<slug>.webp` poster and `<slug>.mp4` preview per model |
+| `badges/` | Civitai badge emblems (transparent WebP) shown under the hero buttons |
 
 ## Adding a model
 
