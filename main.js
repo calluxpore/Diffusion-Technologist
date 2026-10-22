@@ -93,6 +93,23 @@ const BASE_LABELS = {
 
 const baseLabel = tag => BASE_LABELS[tag] || tag;
 
+/* What a LoRA teaches the model. `type` in models.json is one of these keys;
+   `short` is the two letters on the card disc, coloured per type in CSS. */
+const LORA_TYPES = {
+    character: { label: 'Characters', short: 'Ch', title: 'Character LoRA' },
+    style: { label: 'Styles', short: 'St', title: 'Style LoRA' },
+    concept: { label: 'Concepts', short: 'Co', title: 'Concept LoRA' }
+};
+
+/** The small lettered disc that marks a card's (or chip's) LoRA type. */
+function createTypeDisc(type, className) {
+    const disc = document.createElement('span');
+    disc.className = `type-disc type-${type} ${className}`;
+    disc.textContent = LORA_TYPES[type].short;
+    disc.setAttribute('aria-hidden', 'true');
+    return disc;
+}
+
 /* Curated posters for the hero mosaic, in reading order (three per row).
    Names must match models.json; anything missing is skipped. */
 const MOSAIC_MODELS = [
@@ -125,6 +142,7 @@ const el = {
     emptyReset: document.getElementById('empty-reset'),
     categoryFilters: document.getElementById('category-filters'),
     baseFilters: document.getElementById('base-filters'),
+    typeFilters: document.getElementById('type-filters'),
     progressBar: document.getElementById('progress-bar'),
     toTop: document.getElementById('to-top'),
     toolbar: document.getElementById('toolbar'),
@@ -138,7 +156,10 @@ const el = {
    -------------------------------------------------------------------------- */
 
 let allModels = [];
-const state = { query: '', category: ALL, base: ALL };
+const state = { query: '', category: ALL, base: ALL, type: ALL };
+
+const hasFilters = () =>
+    state.query !== '' || state.category !== ALL || state.base !== ALL || state.type !== ALL;
 
 /* --------------------------------------------------------------------------
    Data
@@ -160,10 +181,14 @@ async function loadModels() {
 function prepare(models) {
     return models.map(model => {
         const tags = Array.isArray(model.tags) ? model.tags : [];
+        // An unknown or missing type leaves the card without a disc rather than breaking it.
+        const type = LORA_TYPES[model.type] ? model.type : null;
         return Object.assign({}, model, {
             tags,
+            type,
             category: model.category || 'Uncategorized',
-            haystack: [model.name, model.slug, model.category, tags.join(' '), tags.map(baseLabel).join(' ')]
+            haystack: [model.name, model.slug, model.category, tags.join(' '), tags.map(baseLabel).join(' '),
+                type || '', type ? LORA_TYPES[type].label : '']
                 .join(' ').toLowerCase()
         });
     });
@@ -320,13 +345,16 @@ function createCard(model, index, showCategory) {
     // open-in-new-tab and copy-link like any other link.
     const card = document.createElement('a');
     card.className = 'model-card';
+    // The label replaces the card's content for screen readers, so it carries
+    // the type the disc shows visually.
+    const name = model.type ? `${model.name}, ${LORA_TYPES[model.type].title}` : model.name;
     if (model.civitaiUrl) {
         card.href = model.civitaiUrl;
         card.target = '_blank';
         card.rel = 'noopener noreferrer';
-        card.setAttribute('aria-label', `Open ${model.name} on Civitai`);
+        card.setAttribute('aria-label', `Open ${name} on Civitai`);
     } else {
-        card.setAttribute('aria-label', model.name);
+        card.setAttribute('aria-label', name);
     }
     reveal(card, index);
 
@@ -393,6 +421,12 @@ function createCard(model, index, showCategory) {
             badges.appendChild(badge);
         });
         media.appendChild(badges);
+    }
+
+    if (model.type) {
+        const disc = createTypeDisc(model.type, 'card-type');
+        disc.title = LORA_TYPES[model.type].title;
+        media.appendChild(disc);
     }
 
     if (model.civitaiUrl) {
@@ -529,6 +563,7 @@ function slugify(value) {
 function matches(model, ignore) {
     if (ignore !== 'category' && state.category !== ALL && !inCategory(model, state.category)) return false;
     if (ignore !== 'base' && state.base !== ALL && !model.tags.includes(state.base)) return false;
+    if (ignore !== 'type' && state.type !== ALL && model.type !== state.type) return false;
     if (state.query && !model.haystack.includes(state.query)) return false;
     return true;
 }
@@ -550,11 +585,10 @@ function render() {
     el.empty.hidden = true;
 
     const fragment = document.createDocumentFragment();
-    const isFiltered = state.query !== '' || state.category !== ALL || state.base !== ALL;
 
     // The recent shelf duplicates models that also appear in their own category,
     // so it is only useful on the unfiltered browse view.
-    if (!isFiltered) {
+    if (!hasFilters()) {
         const recent = RECENT_MODELS
             .map(name => allModels.find(model => model.name === name))
             .filter(Boolean);
@@ -597,13 +631,13 @@ function updateChrome(count) {
         ? `${total} models`
         : `${count} of ${total} models`;
 
-    const isFiltered = state.query !== '' || state.category !== ALL || state.base !== ALL;
+    const isFiltered = hasFilters();
     // Always shown so the control never jumps in and out; disabled when there is nothing to clear.
     el.resetFilters.disabled = !isFiltered;
     el.panelReset.disabled = !isFiltered;
 
     // Tells a phone user that chips are active even while the panel is folded.
-    const activeChips = (state.category !== ALL ? 1 : 0) + (state.base !== ALL ? 1 : 0);
+    const activeChips = [state.category, state.base, state.type].filter(value => value !== ALL).length;
     el.filtersCount.hidden = activeChips === 0;
     el.filtersCount.textContent = activeChips;
 
@@ -611,12 +645,16 @@ function updateChrome(count) {
     // dead-end combinations are visible before they are clicked.
     const byCategory = allModels.filter(model => matches(model, 'category'));
     const byBase = allModels.filter(model => matches(model, 'base'));
+    const byType = allModels.filter(model => matches(model, 'type'));
 
     refreshChips(el.categoryFilters, state.category, value =>
         value === ALL ? byCategory.length : byCategory.filter(m => inCategory(m, value)).length);
 
     refreshChips(el.baseFilters, state.base, value =>
         value === ALL ? byBase.length : byBase.filter(m => m.tags.includes(value)).length);
+
+    refreshChips(el.typeFilters, state.type, value =>
+        value === ALL ? byType.length : byType.filter(m => m.type === value).length);
 
     syncUrl();
 }
@@ -647,6 +685,7 @@ function createChip(label, value, count) {
     chip.setAttribute('aria-pressed', 'false');
 
     if (value === FAVOURITES) chip.appendChild(createHeartIcon('chip-icon', 12));
+    if (LORA_TYPES[value]) chip.appendChild(createTypeDisc(value, 'chip-type'));
 
     const text = document.createElement('span');
     text.textContent = label;
@@ -680,6 +719,18 @@ function buildFilters(models) {
     });
     el.baseFilters.querySelector('.chip-list').appendChild(baseFragment);
 
+    const typeFragment = document.createDocumentFragment();
+    typeFragment.appendChild(createChip('All', ALL, models.length));
+    Object.entries(LORA_TYPES).forEach(([type, { label }]) => {
+        typeFragment.appendChild(createChip(label, type, models.filter(m => m.type === type).length));
+    });
+    el.typeFilters.querySelector('.chip-list').appendChild(typeFragment);
+
+    el.typeFilters.addEventListener('click', event => {
+        const chip = event.target.closest('.chip');
+        if (chip) applyFilter('type', chip.dataset.value);
+    });
+
     el.categoryFilters.addEventListener('click', event => {
         const chip = event.target.closest('.chip');
         if (chip) applyFilter('category', chip.dataset.value);
@@ -691,7 +742,7 @@ function buildFilters(models) {
     });
 }
 
-/** @param {'category'|'base'} axis */
+/** @param {'category'|'base'|'type'} axis */
 function applyFilter(axis, value) {
     // Tapping the active chip clears it, which is faster than hunting for "All".
     state[axis] = value === state[axis] ? ALL : value;
@@ -795,6 +846,7 @@ function initSearch() {
         state.query = '';
         state.category = ALL;
         state.base = ALL;
+        state.type = ALL;
         render();
     };
 
@@ -825,6 +877,7 @@ function syncUrl() {
     if (state.query) params.set('q', state.query);
     if (state.category !== ALL) params.set('category', state.category);
     if (state.base !== ALL) params.set('base', state.base);
+    if (state.type !== ALL) params.set('lora', state.type);
     const query = params.toString();
     history.replaceState(null, '', query ? `?${query}` : location.pathname);
 }
@@ -840,6 +893,11 @@ function readUrl(models) {
     const base = params.get('base');
     if (base && models.some(model => model.tags.includes(base))) {
         state.base = base;
+    }
+
+    const type = params.get('lora');
+    if (type && LORA_TYPES[type]) {
+        state.type = type;
     }
 
     const query = params.get('q');

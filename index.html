@@ -23,7 +23,7 @@
     <link rel="preload" href="Fonts/Atkinson-Hyperlegible-Bold-102.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="Fonts/MonoLisa-Regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="Fonts/MonoLisa-Bold.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="stylesheet" href="styles.css?v=14">
 
     <script>
         // Applied before first paint so the page never flashes the wrong theme.
@@ -177,6 +177,11 @@
                     <div class="chip-list"></div>
                 </div>
 
+                <div class="filter-group" id="type-filters" role="group" aria-label="Filter by LoRA type">
+                    <span class="filter-label">LoRA</span>
+                    <div class="chip-list"></div>
+                </div>
+
                 <!-- The narrow-screen home for Reset, which would crowd the search row there. -->
                 <button class="reset-filters panel-reset" id="panel-reset" type="button" disabled>Reset all</button>
             </div>
@@ -230,7 +235,7 @@
         </svg>
     </button>
 
-    <script src="main.js?v=11" defer></script>
+    <script src="main.js?v=12" defer></script>
 </body>
 
 </html>

@@ -52,13 +52,15 @@ alongside it:
   "name": "Display Name",
   "slug": "Media File Name",
   "category": "Art Styles & Techniques",
+  "type": "style",
   "civitaiUrl": "https://civitai.com/models/...",
   "tags": ["Flux"]
 }
 ```
 
-`slug` must match the media filenames. `tags[0]` is shown as the badge on the card and
-feeds the base-model filter. New categories appear automatically; to control where one
+`slug` must match the media filenames. Every tag in `tags` shows as a badge on the card and
+feeds the base-model filter. `type` is `character`, `style` or `concept`: it sets the
+Ch / St / Co disc on the card and the LoRA filter. New categories appear automatically; to control where one
 sits in the filter bar, add it to `CATEGORY_ORDER` in `main.js`. The "Most Recent" shelf
 is the `RECENT_MODELS` list in the same file.
 
