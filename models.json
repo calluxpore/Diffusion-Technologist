@@ -619,6 +619,16 @@
     ]
   },
   {
+    "name": "Scary Masks",
+    "slug": "Scary Masks",
+    "category": "Art Styles & Techniques",
+    "type": "concept",
+    "civitaiUrl": "https://civitai.com/models/3016013/scary-masks",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Sherpa",
     "slug": "Sherpa",
     "category": "Fashion",
