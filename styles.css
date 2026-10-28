@@ -348,7 +348,7 @@ p {
 }
 
 .hero-title {
-    padding-top: clamp(24px, 5vh, 72px);
+    padding-top: clamp(20px, 3.5vh, 56px);
 }
 
 .display {
@@ -378,11 +378,71 @@ p {
     margin-top: 28px;
 }
 
-.hero-intro .lead {
+.hero-copy {
     grid-column: 1 / 8;
+}
+
+.hero-intro .lead {
     font-size: var(--step-lead);
     line-height: 1.35;
     max-width: 46ch;
+}
+
+/* The badges: pictures only, named one at a time in the line beneath. */
+.hero-badges {
+    margin-top: 24px;
+}
+
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.badge {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius);
+    transition: background-color var(--t-hover) ease, opacity var(--t-hover) ease, transform var(--t-ui) var(--ease-out);
+}
+
+.badge img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.badge:hover,
+.badge:focus-visible {
+    background: #1f1e1c;
+    transform: translateY(-3px);
+}
+
+.badge:focus-visible {
+    outline-color: var(--field-ink);
+}
+
+@media (hover: hover) {
+    .badge-row:hover .badge:not(:hover) {
+        opacity: 0.45;
+    }
+}
+
+.badge-readout {
+    min-height: 1.45em;
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-small);
+    line-height: 1.45;
+    color: var(--field-muted);
+}
+
+.badge-readout strong {
+    font-weight: 500;
+    color: var(--field-ink);
 }
 
 .hero-actions {
@@ -399,7 +459,7 @@ p {
 
 /* The strip: one row wider than the screen, cropped by both edges. */
 .strip {
-    --strip-h: clamp(220px, 34vh, 340px);
+    --strip-h: clamp(200px, 30vh, 320px);
     display: flex;
     gap: 10px;
     height: var(--strip-h);
@@ -542,9 +602,7 @@ p {
 .run-picture img,
 .run-picture video,
 .preview-media img,
-.preview-media video,
-.ledger-preview img,
-.ledger-preview video {
+.preview-media video {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -562,15 +620,13 @@ p {
 }
 
 .run-picture video,
-.preview-media video,
-.ledger-preview video {
+.preview-media video {
     opacity: 0;
     transition: opacity 300ms ease;
 }
 
 .run-picture video.is-playing,
-.preview-media video.is-playing,
-.ledger-preview video.is-playing {
+.preview-media video.is-playing {
     opacity: 1;
 }
 
@@ -596,84 +652,7 @@ p {
 }
 
 /* --------------------------------------------------------------------------
-   6. FAVOURITES: a quiet ledger with a preview beside it
-   -------------------------------------------------------------------------- */
-.ledger {
-    position: relative;
-    width: min(560px, 100% - 2 * var(--margin));
-    margin-left: 22vw;
-}
-
-.ledger-list {
-    margin-top: 32px;
-}
-
-.ledger-row {
-    display: grid;
-    grid-template-columns: 55% minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 12px;
-    min-height: 44px;
-    text-decoration: none;
-    transition: color var(--t-hover) ease;
-}
-
-.ledger-name {
-    font-size: var(--step-body);
-    line-height: 1.25;
-}
-
-.ledger-kind,
-.ledger-base {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: var(--step-small);
-    color: var(--muted);
-}
-
-.ledger-base {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.ledger-thumb {
-    display: none;
-}
-
-@media (hover: hover) {
-
-    .ledger-list:hover .ledger-row:not(:hover),
-    .ledger-list:has(.ledger-row:focus-visible) .ledger-row:not(:focus-visible) {
-        color: var(--muted);
-    }
-}
-
-.ledger-more {
-    margin-top: 28px;
-}
-
-.ledger-preview {
-    border-radius: var(--radius);
-    position: absolute;
-    left: calc(100% + 64px);
-    top: 0;
-    width: 300px;
-    aspect-ratio: 1;
-    overflow: clip;
-    background: var(--surface);
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 150ms ease, transform var(--t-ui) var(--ease-out), top var(--t-ui) var(--ease-out);
-    pointer-events: none;
-}
-
-.ledger-preview.is-visible {
-    opacity: 1;
-    transform: none;
-}
-
-/* --------------------------------------------------------------------------
-   7. ARCHIVE: the contact sheet itself
+   6. ARCHIVE: the contact sheet itself
    -------------------------------------------------------------------------- */
 .archive {
     padding-bottom: calc(var(--section) / 2);
@@ -1097,15 +1076,11 @@ p {
 }
 
 /* --------------------------------------------------------------------------
-   8. ABOUT: facts at the margin, one wide paragraph from the 34% line
+   7. ABOUT: facts at the margin, one wide paragraph from the 34% line
    -------------------------------------------------------------------------- */
 .about-row {
     display: grid;
     grid-template-columns: calc(34vw - var(--margin)) minmax(0, 1fr);
-}
-
-.about-row + .about-row {
-    margin-top: 120px;
 }
 
 .facts {
@@ -1129,136 +1104,8 @@ p {
     line-height: 1.38;
 }
 
-.about-word {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: var(--step-small);
-}
-
-.tallies {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px 64px;
-}
-
-.tallies > div {
-    width: 260px;
-}
-
-.tally-title {
-    margin-bottom: 14px;
-    font-size: var(--step-small);
-    font-weight: 700;
-    letter-spacing: 0;
-}
-
-.tally {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: var(--step-small);
-}
-
-.tally li {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.tally li span:last-child {
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
 /* --------------------------------------------------------------------------
-   9. PROOF: the Civitai badges as a table with no lines
-   -------------------------------------------------------------------------- */
-.proof-head {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gutter);
-    align-items: end;
-}
-
-.proof-title {
-    grid-column: 1 / 8;
-    font-size: var(--step-head);
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-}
-
-.proof-title span {
-    display: block;
-}
-
-.proof-indent {
-    padding-left: calc((100% - 11 * var(--gutter)) / 12 * 2 + 2 * var(--gutter));
-}
-
-.proof-note {
-    grid-column: 8 / 13;
-    max-width: 36ch;
-    font-size: var(--step-body);
-}
-
-.proof-table {
-    width: 100%;
-    margin-top: 72px;
-    border-collapse: collapse;
-    font-size: var(--step-body);
-}
-
-.proof-table th,
-.proof-table td {
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 400;
-    vertical-align: middle;
-}
-
-.proof-table th {
-    width: 25%;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: var(--step-small);
-}
-
-.proof-table td:last-child {
-    text-align: right;
-    color: var(--muted);
-}
-
-.proof-table td img {
-    display: inline-block;
-    width: 36px;
-    height: 36px;
-    margin-right: 16px;
-    vertical-align: middle;
-    object-fit: contain;
-}
-
-.proof-table tr.tone {
-    background: var(--surface);
-}
-
-/* Table rows cannot round themselves, so their end cells carry the corners. */
-.proof-table tr.tone > :first-child {
-    border-radius: var(--radius) 0 0 var(--radius);
-}
-
-.proof-table tr.tone > :last-child {
-    border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-.proof-table tr.group-gap td {
-    padding: 0;
-    height: 20px;
-}
-
-/* --------------------------------------------------------------------------
-   10. CONTACT AND FOOTER
+   8. CONTACT AND FOOTER
    -------------------------------------------------------------------------- */
 .contact {
     padding-top: 160px;
@@ -1376,7 +1223,7 @@ p {
 }
 
 /* --------------------------------------------------------------------------
-   11. MOTION: load sequence, entrances; the finished state is the default
+   9. MOTION: load sequence, entrances; the finished state is the default
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
     .js .hero [data-line] {
@@ -1451,14 +1298,8 @@ p {
 }
 
 /* --------------------------------------------------------------------------
-   12. NARROWER SCREENS
+   10. NARROWER SCREENS
    -------------------------------------------------------------------------- */
-@media (max-width: 75em) {
-    .ledger-preview {
-        display: none;
-    }
-}
-
 @media (max-width: 64em) {
     .hero-who {
         grid-column: 1 / 5;
@@ -1476,8 +1317,8 @@ p {
         grid-column: 9 / 13;
     }
 
-    .hero-intro .lead {
-        grid-column: 1 / 9;
+    .hero-copy {
+        grid-column: 1 / 10;
     }
 
     .hero-actions {
@@ -1506,10 +1347,6 @@ p {
 
     .frame.is-selected .frame-picture {
         outline: 0;
-    }
-
-    .ledger {
-        margin-left: var(--margin);
     }
 
     /* The chips fold behind the Filters button. */
@@ -1646,8 +1483,18 @@ p {
         margin-top: 24px;
     }
 
-    .hero-intro .lead {
+    .hero-copy {
         grid-column: 1 / 13;
+    }
+
+    .badge {
+        width: 40px;
+        height: 40px;
+    }
+
+    .badge img {
+        width: 32px;
+        height: 32px;
     }
 
     .hero-actions {
@@ -1683,11 +1530,6 @@ p {
         gap: 2px;
     }
 
-    .ledger {
-        width: auto;
-        margin-inline: var(--margin);
-    }
-
     .run.is-folded .frame:nth-child(n + 7) {
         display: none;
     }
@@ -1696,39 +1538,6 @@ p {
         display: inline;
         justify-self: start;
         min-height: 44px;
-    }
-
-    .ledger-row {
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas:
-            "thumb thumb"
-            "name base"
-            "kind kind";
-        min-height: 48px;
-        padding-block: 6px;
-    }
-
-    .ledger-name {
-        grid-area: name;
-    }
-
-    .ledger-base {
-        grid-area: base;
-    }
-
-    .ledger-kind {
-        grid-area: kind;
-    }
-
-    .ledger-thumb {
-        border-radius: var(--radius);
-        grid-area: thumb;
-        display: block;
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        object-fit: cover;
-        margin-bottom: 10px;
-        background: var(--surface);
     }
 
     .search input {
@@ -1752,10 +1561,6 @@ p {
         order: 2;
     }
 
-    .about-row + .about-row {
-        margin-top: 64px;
-    }
-
     .facts {
         width: auto;
         display: grid;
@@ -1764,86 +1569,6 @@ p {
 
     .about-text {
         font-size: var(--step-lead);
-    }
-
-    .about-word {
-        font-weight: 700;
-    }
-
-    .tallies > div {
-        width: 100%;
-    }
-
-    .proof {
-        margin-top: 32px;
-    }
-
-    .proof-head {
-        grid-template-columns: minmax(0, 1fr);
-        row-gap: 20px;
-    }
-
-    .proof-title,
-    .proof-note {
-        grid-column: 1;
-    }
-
-    .proof-title {
-        font-size: var(--step-display);
-    }
-
-    .proof-table,
-    .proof-table tbody {
-        display: block;
-    }
-
-    .proof-table tr {
-        display: grid;
-        grid-template-columns: 28px minmax(0, 1fr) auto;
-        align-items: center;
-        column-gap: 12px;
-        padding: 8px 10px;
-        border-radius: var(--radius);
-    }
-
-    .proof-table th {
-        display: none;
-    }
-
-    .proof-table tr.group-start th {
-        display: block;
-        grid-column: 1 / -1;
-        width: auto;
-        padding: 0 0 10px;
-        font-size: var(--step-lead);
-        font-weight: 700;
-    }
-
-    .proof-table td {
-        padding: 0;
-    }
-
-    .proof-table td:nth-of-type(1) {
-        display: contents;
-    }
-
-    .proof-table td img {
-        width: 28px;
-        height: 28px;
-        margin: 0;
-    }
-
-    .proof-table td:last-child {
-        text-align: right;
-        font-family: var(--font-display);
-        font-weight: 500;
-        font-size: var(--step-small);
-    }
-
-    .proof-table tr.group-gap {
-        display: block;
-        height: 16px;
-        padding: 0;
     }
 
     .contact {

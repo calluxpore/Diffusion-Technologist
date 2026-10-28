@@ -1,7 +1,7 @@
 /* ==========================================================================
    LoRA Archive: application logic
-   Loads models.json, fills the hero strip, the newest run, the favourites
-   ledger and the contact sheet, and drives search + filters.
+   Loads models.json, fills the hero strip, the newest run and the contact
+   sheet, and drives search + filters.
    ========================================================================== */
 
 'use strict';
@@ -28,7 +28,7 @@ const RECENT_MODELS = [
     'Hallucination'
 ];
 
-/* Curated favourites, shown as the ledger and as a filter. Names must match models.json. */
+/* Curated favourites, offered as a filter in the archive. Names must match models.json. */
 const FAVOURITE_MODELS = [
     'Industrial Design Anima Style Rendering',
     'HeptapodB',
@@ -148,14 +148,10 @@ const el = {
     stripCaption: document.getElementById('strip-caption'),
     newestRun: document.getElementById('newest-run'),
     newestNote: document.getElementById('newest-note'),
-    ledger: document.getElementById('ledger-list'),
-    ledgerMore: document.getElementById('ledger-more'),
-    ledgerPreview: document.getElementById('ledger-preview'),
     preview: document.getElementById('preview'),
     heroCount: document.getElementById('hero-count'),
     heroBases: document.getElementById('hero-bases'),
-    tallyBases: document.getElementById('tally-bases'),
-    tallySubjects: document.getElementById('tally-subjects')
+    badgeReadout: document.getElementById('badge-readout')
 };
 
 /* --------------------------------------------------------------------------
@@ -411,10 +407,8 @@ function reveal(element, stagger = 0, kind = 'reveal') {
 function revealStatic() {
     const groups = [
         ['#newest .newest-side > *'],
-        ['#favourites .section-title'],
         ['#archive .archive-head > *'],
         ['#about .about-row > *'],
-        ['#proof .proof-title span', '#proof .proof-note'],
         ['#contact > *']
     ];
     groups.forEach(selectors => {
@@ -422,8 +416,6 @@ function revealStatic() {
             document.querySelectorAll(selector).forEach((node, index) => reveal(node, index));
         });
     });
-    document.querySelectorAll('#proof tbody tr:not(.group-gap)').forEach((row, index) => reveal(row, index % 5));
-    document.querySelectorAll('.tally li').forEach((item, index) => reveal(item, index % 6));
 }
 
 /* --------------------------------------------------------------------------
@@ -637,83 +629,6 @@ function attachHoverVideo(target, video) {
     target.addEventListener('mouseleave', () => stopVideo(video));
     target.addEventListener('focus', () => startVideo(video));
     target.addEventListener('blur', () => stopVideo(video));
-}
-
-/* --------------------------------------------------------------------------
-   Favourites: a ledger of names, with the poster beside the row in hand
-   -------------------------------------------------------------------------- */
-
-let restLedger = null;
-
-function buildLedger(models) {
-    const favourites = byNames(FAVOURITE_MODELS, models);
-    const previewImg = document.createElement('img');
-    previewImg.alt = '';
-    const previewVideo = createVideo(null, null);
-    el.ledgerPreview.append(previewImg, previewVideo);
-
-    favourites.forEach((model, index) => {
-        const item = document.createElement('li');
-        const row = document.createElement('a');
-        row.className = 'ledger-row';
-        linkTo(row, model);
-
-        // Phones have no hover preview, so the first row carries its own picture.
-        if (index === 0) {
-            const thumb = createPoster(model, { alt: '' });
-            thumb.className = 'ledger-thumb';
-            row.appendChild(thumb);
-        }
-
-        const name = document.createElement('span');
-        name.className = 'ledger-name';
-        name.textContent = model.name;
-        const kind = document.createElement('span');
-        kind.className = 'ledger-kind';
-        kind.textContent = model.category;
-        const base = document.createElement('span');
-        base.className = 'ledger-base';
-        base.textContent = baseLabel(model.tags[0] || '');
-        row.append(name, kind, base);
-
-        const show = play => {
-            el.ledgerPreview.style.top = `${item.offsetTop - 8}px`;
-            if (previewImg.dataset.slug !== model.slug) {
-                previewImg.dataset.slug = model.slug;
-                previewImg.src = posterPath(model);
-                retarget(previewVideo, model);
-            }
-            el.ledgerPreview.classList.add('is-visible');
-            if (play && !saveData) startVideo(previewVideo);
-        };
-        row.addEventListener('mouseenter', () => show(true));
-        row.addEventListener('focus', () => show(true));
-        row.addEventListener('blur', () => stopVideo(previewVideo));
-        if (index === 0) restLedger = () => show(false);
-
-        item.appendChild(row);
-        reveal(item, index);
-        el.ledger.appendChild(item);
-    });
-
-    // Leaving the list brings the preview back to the first row and stills it.
-    el.ledger.addEventListener('mouseleave', () => {
-        stopVideo(previewVideo);
-        if (restLedger) restLedger();
-    });
-    if (restLedger) {
-        // Row offsets are only right once the fonts have set the list.
-        restLedger();
-        if (document.fonts) document.fonts.ready.then(restLedger);
-    }
-
-    el.ledgerMore.addEventListener('click', () => {
-        state.category = FAVOURITES;
-        setFilterPanel(false);
-        render();
-        scrollToResults();
-    });
-    reveal(el.ledgerMore, favourites.length);
 }
 
 /* --------------------------------------------------------------------------
@@ -1136,8 +1051,8 @@ function initSearch() {
 }
 
 /* --------------------------------------------------------------------------
-   Counts: the first screen and the about section read from the data, so a
-   new model updates them without touching the markup
+   Counts: the first screen reads from the data, so a new model updates it
+   without touching the markup
    -------------------------------------------------------------------------- */
 
 function fillCounts(models) {
@@ -1147,22 +1062,30 @@ function fillCounts(models) {
     el.heroBases.textContent = labels.length > 1
         ? `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`
         : labels.join('');
+}
 
-    const tally = (list, rows) => {
-        list.replaceChildren(...rows.map(([label, count]) => {
-            const item = document.createElement('li');
-            const name = document.createElement('span');
-            name.textContent = label;
-            const value = document.createElement('span');
-            value.textContent = count;
-            item.append(name, value);
-            return item;
-        }));
+/* --------------------------------------------------------------------------
+   Hero badges: the row is pictures only; the one in hand is named beneath it
+   -------------------------------------------------------------------------- */
+
+function initBadges() {
+    const readout = el.badgeReadout;
+    if (!readout) return;
+    const resting = readout.textContent;
+
+    const show = badge => {
+        const name = document.createElement('strong');
+        name.textContent = badge.dataset.name;
+        readout.replaceChildren(name, document.createTextNode(` ${badge.dataset.note}`));
     };
+    const rest = () => { readout.textContent = resting; };
 
-    tally(el.tallyBases, bases.map(([tag, count]) => [baseLabel(tag), count]));
-    tally(el.tallySubjects, orderedCategories(models)
-        .map(category => [category, models.filter(model => model.category === category).length]));
+    document.querySelectorAll('.badge').forEach(badge => {
+        badge.addEventListener('mouseenter', () => show(badge));
+        badge.addEventListener('focus', () => show(badge));
+        badge.addEventListener('mouseleave', rest);
+        badge.addEventListener('blur', rest);
+    });
 }
 
 /* --------------------------------------------------------------------------
@@ -1294,6 +1217,7 @@ function showError(message) {
 
 async function init() {
     initTheme();
+    initBadges();
     initScrollChrome();
     trackToolbarHeight();
     revealStatic();
@@ -1316,7 +1240,6 @@ async function init() {
     fillCounts(allModels);
     buildStrip(allModels);
     buildNewest(allModels);
-    buildLedger(allModels);
     buildPreview();
     buildFilters(allModels);
     initFilterPanel();

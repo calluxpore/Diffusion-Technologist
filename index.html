@@ -55,7 +55,6 @@
             </p>
             <nav class="hero-block hero-nav" aria-label="On this page">
                 <a href="#newest">Newest</a>
-                <a href="#favourites">Favourites</a>
                 <a href="#archive">Archive</a>
                 <a href="#about">About</a>
             </nav>
@@ -74,10 +73,33 @@
                 <span class="line"><span data-line>LoRA Archive</span></span>
             </h1>
             <div class="hero-intro">
-                <p class="lead" data-load style="--d:380ms">
-                    Diffusion models I trained on my own work or on synthetic images.
-                    Every one is open source and free to download on Civitai.
-                </p>
+                <div class="hero-copy">
+                    <p class="lead" data-load style="--d:380ms">
+                        Diffusion models I trained on my own work or on synthetic images.
+                        Every one is open source and free to download on Civitai.
+                    </p>
+                    <!-- Badges earned on Civitai. Pointing at one, or tabbing to it, names it below the row. -->
+                    <div class="hero-badges" data-load style="--d:520ms">
+                        <ul class="badge-row" aria-label="Badges earned on Civitai">
+                            <li class="badge" tabindex="0" data-name="Top 8 XL Creator" data-note="A top-eight place among XL creators"><img src="badges/top-8-xl-creator.webp" alt="Top 8 XL Creator: A top-eight place among XL creators" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Beacon" data-note="40,000 creator score"><img src="badges/beacon.webp" alt="Beacon: 40,000 creator score" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Blaze" data-note="10,000 creator score"><img src="badges/blaze.webp" alt="Blaze: 10,000 creator score" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Flame" data-note="5,000 creator score"><img src="badges/flame.webp" alt="Flame: 5,000 creator score" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Kindle" data-note="1,000 creator score"><img src="badges/kindle.webp" alt="Kindle: 1,000 creator score" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Spark" data-note="500 creator score"><img src="badges/spark.webp" alt="Spark: 500 creator score" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="10k Downloads" data-note="10,000 downloads"><img src="badges/10k-downloads.webp?v=2" alt="10k Downloads: 10,000 downloads" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="1k Downloads" data-note="1,000 downloads"><img src="badges/1k-downloads.webp?v=2" alt="1k Downloads: 1,000 downloads" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Downloads" data-note="100 downloads"><img src="badges/100-downloads.webp" alt="100 Downloads: 100 downloads" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="1k Reactions" data-note="1,000 reactions"><img src="badges/1k-reactions.webp?v=2" alt="1k Reactions: 1,000 reactions" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Reactions" data-note="100 reactions"><img src="badges/100-reactions.webp" alt="100 Reactions: 100 reactions" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Followers" data-note="100 followers"><img src="badges/100-followers.webp?v=2" alt="100 Followers: 100 followers" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="25 Models" data-note="25 models published"><img src="badges/25-models.webp?v=2" alt="25 Models: 25 models published" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="5 Models" data-note="5 models published"><img src="badges/5-models.webp?v=2" alt="5 Models: 5 models published" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="First Model" data-note="The first model published"><img src="badges/first-model.webp" alt="First Model: The first model published" width="36" height="36" decoding="async"></li>
+                        </ul>
+                        <p class="badge-readout" id="badge-readout" aria-hidden="true">Badges earned on Civitai</p>
+                    </div>
+                </div>
                 <div class="hero-actions" data-load style="--d:460ms">
                     <a class="button" href="#archive">Browse the archive</a>
                     <a class="text-link" href="https://civitai.com/user/callux" target="_blank"
@@ -100,16 +122,6 @@
                 <p class="newest-note" id="newest-note"></p>
             </div>
             <div class="newest-run" id="newest-run"></div>
-        </section>
-
-        <section class="favourites section" id="favourites" aria-labelledby="favourites-title">
-            <div class="ledger">
-                <h2 class="section-title" id="favourites-title">My favourites</h2>
-                <ol class="ledger-list" id="ledger-list"></ol>
-                <button class="text-link ledger-more" id="ledger-more" type="button">Show only these in the
-                    archive</button>
-                <figure class="ledger-preview" id="ledger-preview" aria-hidden="true"></figure>
-            </div>
         </section>
 
         <section class="archive section" id="archive" aria-labelledby="archive-title">
@@ -211,123 +223,6 @@
                     my own original work or from synthetic images, never from anyone else's.
                 </p>
             </div>
-            <div class="about-row">
-                <p class="about-word">In numbers</p>
-                <div class="tallies">
-                    <div>
-                        <h3 class="tally-title">By base model</h3>
-                        <ul class="tally" id="tally-bases"></ul>
-                    </div>
-                    <div>
-                        <h3 class="tally-title">By subject</h3>
-                        <ul class="tally" id="tally-subjects"></ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="proof wrap section" id="proof" aria-labelledby="proof-title">
-            <div class="proof-head">
-                <h2 class="proof-title" id="proof-title">
-                    <span>Recognised</span>
-                    <span class="proof-indent">on Civitai</span>
-                </h2>
-                <p class="proof-note">
-                    Fifteen badges from Civitai, where every model in this archive is published and
-                    downloaded.
-                </p>
-            </div>
-            <table class="proof-table">
-                <caption class="visually-hidden">Badges earned on Civitai</caption>
-                <thead class="visually-hidden">
-                    <tr>
-                        <th scope="col">Kind</th>
-                        <th scope="col">Badge</th>
-                        <th scope="col">Milestone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="group-start">
-                        <th scope="row">Ranking</th>
-                        <td><img src="badges/top-8-xl-creator.webp" alt="" width="40" height="40" loading="lazy">Top 8 XL Creator</td>
-                        <td>A top-eight place among XL creators</td>
-                    </tr>
-                    <tr class="group-gap" aria-hidden="true"><td colspan="3"></td></tr>
-                    <tr class="group-start tone">
-                        <th scope="row">Creator score</th>
-                        <td><img src="badges/beacon.webp" alt="" width="40" height="40" loading="lazy">Beacon</td>
-                        <td class="nums">40,000</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><span class="visually-hidden">Creator score</span></th>
-                        <td><img src="badges/blaze.webp" alt="" width="40" height="40" loading="lazy">Blaze</td>
-                        <td class="nums">10,000</td>
-                    </tr>
-                    <tr class="tone">
-                        <th scope="row"><span class="visually-hidden">Creator score</span></th>
-                        <td><img src="badges/flame.webp" alt="" width="40" height="40" loading="lazy">Flame</td>
-                        <td class="nums">5,000</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><span class="visually-hidden">Creator score</span></th>
-                        <td><img src="badges/kindle.webp" alt="" width="40" height="40" loading="lazy">Kindle</td>
-                        <td class="nums">1,000</td>
-                    </tr>
-                    <tr class="tone">
-                        <th scope="row"><span class="visually-hidden">Creator score</span></th>
-                        <td><img src="badges/spark.webp" alt="" width="40" height="40" loading="lazy">Spark</td>
-                        <td class="nums">500</td>
-                    </tr>
-                    <tr class="group-gap" aria-hidden="true"><td colspan="3"></td></tr>
-                    <tr class="group-start">
-                        <th scope="row">Downloads</th>
-                        <td><img src="badges/10k-downloads.webp?v=2" alt="" width="40" height="40" loading="lazy">10k Downloads</td>
-                        <td class="nums">10,000</td>
-                    </tr>
-                    <tr class="tone">
-                        <th scope="row"><span class="visually-hidden">Downloads</span></th>
-                        <td><img src="badges/1k-downloads.webp?v=2" alt="" width="40" height="40" loading="lazy">1k Downloads</td>
-                        <td class="nums">1,000</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><span class="visually-hidden">Downloads</span></th>
-                        <td><img src="badges/100-downloads.webp" alt="" width="40" height="40" loading="lazy">100 Downloads</td>
-                        <td class="nums">100</td>
-                    </tr>
-                    <tr class="group-gap" aria-hidden="true"><td colspan="3"></td></tr>
-                    <tr class="group-start tone">
-                        <th scope="row">Community</th>
-                        <td><img src="badges/1k-reactions.webp?v=2" alt="" width="40" height="40" loading="lazy">1k Reactions</td>
-                        <td class="nums">1,000 reactions</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><span class="visually-hidden">Community</span></th>
-                        <td><img src="badges/100-reactions.webp" alt="" width="40" height="40" loading="lazy">100 Reactions</td>
-                        <td class="nums">100 reactions</td>
-                    </tr>
-                    <tr class="tone">
-                        <th scope="row"><span class="visually-hidden">Community</span></th>
-                        <td><img src="badges/100-followers.webp?v=2" alt="" width="40" height="40" loading="lazy">100 Followers</td>
-                        <td class="nums">100 followers</td>
-                    </tr>
-                    <tr class="group-gap" aria-hidden="true"><td colspan="3"></td></tr>
-                    <tr class="group-start">
-                        <th scope="row">Published</th>
-                        <td><img src="badges/25-models.webp?v=2" alt="" width="40" height="40" loading="lazy">25 Models</td>
-                        <td class="nums">25 models</td>
-                    </tr>
-                    <tr class="tone">
-                        <th scope="row"><span class="visually-hidden">Published</span></th>
-                        <td><img src="badges/5-models.webp?v=2" alt="" width="40" height="40" loading="lazy">5 Models</td>
-                        <td class="nums">5 models</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><span class="visually-hidden">Published</span></th>
-                        <td><img src="badges/first-model.webp" alt="" width="40" height="40" loading="lazy">First Model</td>
-                        <td>The first model</td>
-                    </tr>
-                </tbody>
-            </table>
         </section>
 
         <section class="contact wrap grid" id="contact" aria-labelledby="contact-title">

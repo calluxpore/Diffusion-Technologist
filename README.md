@@ -18,12 +18,12 @@ from Google Fonts. The hero is a black field in both themes so the posters are i
 - A hero strip of posters wider than the screen, shuffled on every visit: drag or swipe it, and
   the frame that comes to rest in the middle is lit and plays its preview
 - "Newest weights": the newest model lifted out of a run of the recent ones
-- "My favourites": a ledger of names, with the poster and its loop beside the row in hand
 - The archive: one run of frames per category, with an enlarged preview (poster, loop, type,
   base models, Civitai link) that follows the pointer or keyboard focus. Phones fold each run to
   two rows behind a "Show all" link while nothing is filtered
-- An about section whose base-model and subject tallies are counted from `models.json`, and the
-  Civitai badges set as a table
+- The Civitai badges under the hero paragraph: pictures only, each named in the line beneath
+  it on hover or keyboard focus
+- A short about section and a contact close
 - A compact pinned toolbar: search and filters inline on desktop, with the chips folded behind a
   Filters button on phones and tablets
 - Video previews play on hover or focus, and in the middle of the hero strip. Each `.mp4`
@@ -45,7 +45,7 @@ from Google Fonts. The hero is a black field in both themes so the posters are i
 | `main.js` | Data loading, search, filtering, rendering, theme |
 | `models.json` | The model list, and the only file to edit when publishing a new model |
 | `media/` | `<slug>.webp` poster and `<slug>.mp4` preview per model |
-| `badges/` | Civitai badge emblems (transparent WebP) shown in the recognition table |
+| `badges/` | Civitai badge emblems (transparent WebP) shown under the hero paragraph |
 
 ## Adding a model
 
@@ -67,7 +67,7 @@ alongside it:
 feeds the base-model filter. `type` is `character`, `style` or `concept`: it names the
 LoRA type in the preview and feeds the "Teaches" filter. New categories appear automatically; to
 control where one sits, add it to `CATEGORY_ORDER` in `main.js`. The curated lists live in the
-same file: `RECENT_MODELS` (the newest run, first one lifted), `FAVOURITE_MODELS` (the ledger)
+same file: `RECENT_MODELS` (the newest run, first one lifted), `FAVOURITE_MODELS` (the "My Favourites" filter)
 and `STRIP_MODELS` (the hero strip).
 
 ## Local preview
