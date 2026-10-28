@@ -180,6 +180,16 @@
     ]
   },
   {
+    "name": "Clay Model",
+    "slug": "Clay Model",
+    "category": "Art Styles & Techniques",
+    "type": "style",
+    "civitaiUrl": "https://civitai.com/models/3024238/clay-model",
+    "tags": [
+      "Anima"
+    ]
+  },
+  {
     "name": "Cleopatra",
     "slug": "Cleopatra",
     "category": "Character & Portraits",

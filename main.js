@@ -16,22 +16,15 @@ const FAVOURITES = 'My Favourites';
 /* Curated "most recent" shelf, newest first. Names must match models.json;
    anything missing is skipped silently so the shelf never breaks the page. */
 const RECENT_MODELS = [
-    'Scary Masks',
+    'Clay Model',
     'Messy Type',
     'Meta Brown',
     'Old Me',
     'Temporal Shift',
-    'Voronoi',
-    'Halftone Orange',
-    'Grook',
-    'Namos',
     'Face Tattoos',
-    'The Iron Warden',
     'Industrial Design Anima Style Rendering',
     'HeptapodB',
-    'Anbui',
-    'Hallucination',
-    'Impasto'
+    'Hallucination'
 ];
 
 /* Curated favourites shelf, shown directly below Most Recent. Names must match models.json. */
