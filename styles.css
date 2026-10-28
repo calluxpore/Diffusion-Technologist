@@ -487,7 +487,7 @@ p {
     position: relative;
     flex: 0 0 auto;
     height: 100%;
-    aspect-ratio: var(--ratio, 1);
+    aspect-ratio: 1;
     scroll-snap-align: center;
     background: #1c1c1c;
     overflow: clip;
@@ -501,6 +501,7 @@ p {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 30%;
     -webkit-user-drag: none;
 }
 
@@ -958,7 +959,7 @@ p {
 
 .frame {
     display: block;
-    width: calc(var(--frame-h) * var(--ratio, 1));
+    width: var(--frame-h);
     text-decoration: none;
     transition: opacity var(--t-hover) ease;
 }
@@ -975,6 +976,7 @@ p {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 30%;
 }
 
 .frame-name {
@@ -1027,9 +1029,9 @@ p {
 .preview-media {
     border-radius: var(--radius);
     position: relative;
-    width: 100%;
-    max-height: calc(100svh - var(--toolbar-h) - 220px);
-    aspect-ratio: var(--ratio, 1);
+    /* Square like every other frame, and short enough to leave room for its caption. */
+    width: min(100%, 100svh - var(--toolbar-h) - 220px);
+    aspect-ratio: 1;
     overflow: clip;
     background: var(--surface);
 }
@@ -1502,8 +1504,8 @@ p {
     }
 
     .strip {
-        --strip-h: 46vh;
-        padding-inline: calc(50vw - var(--strip-h) * 0.4);
+        /* One square frame with the edges of its neighbours either side. */
+        --strip-h: min(46vh, 72vw);
     }
 
     .strip-caption {

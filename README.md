@@ -65,7 +65,7 @@ alongside it:
 
 `slug` must match the media filenames. Every tag in `tags` is listed in the preview and
 feeds the base-model filter. `type` is `character`, `style` or `concept`: it names the
-LoRA type in the preview and feeds the "Teaches" filter. New categories appear automatically; to
+LoRA type in the preview and feeds the "LoRA" filter. New categories appear automatically; to
 control where one sits, add it to `CATEGORY_ORDER` in `main.js`. The curated lists live in the
 same file: `RECENT_MODELS` (the newest run, first one lifted), `FAVOURITE_MODELS` (the "My Favourites" filter)
 and `STRIP_MODELS` (the hero strip).

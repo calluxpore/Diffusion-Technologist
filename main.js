@@ -218,10 +218,6 @@ function orderedBases(models) {
 const posterPath = model => `media/${encodeURIComponent(model.slug)}.webp`;
 const videoPath = model => `media/${encodeURIComponent(model.slug)}.mp4`;
 
-/* Natural poster proportions, learned as each poster loads, so the enlarged
-   preview can take the same shape as the frame it enlarges. */
-const ratios = new Map();
-
 /* --------------------------------------------------------------------------
    Video: previews play when the pointer rests on a model, or when the hero
    strip brings one to the middle. An .mp4 is only fetched the first time it
@@ -302,11 +298,6 @@ function createPoster(model, { lazy = true, alt } = {}) {
     if (lazy) img.loading = 'lazy';
     img.decoding = 'async';
     img.draggable = false;
-    img.addEventListener('load', () => {
-        if (img.naturalWidth && img.naturalHeight) {
-            ratios.set(model.slug, img.naturalWidth / img.naturalHeight);
-        }
-    });
     return img;
 }
 
@@ -447,10 +438,6 @@ function buildStrip(models) {
         frame.dataset.meta = `${typeTitle(model)} · ${baseList(model)}`;
 
         const img = createPoster(model, { lazy: index > 6, alt: '' });
-        img.addEventListener('load', () => {
-            frame.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
-            if (frame.classList.contains('is-centre')) alignCaption(frame);
-        });
         guardPoster(img, frame);
         frame.appendChild(img);
 
@@ -474,8 +461,6 @@ function buildStrip(models) {
         el.strip.scrollLeft = frame.offsetLeft + frame.offsetWidth / 2 - el.strip.clientWidth / 2;
     };
     centreOn(start);
-    // The first poster's real width is only known once it loads.
-    start.querySelector('img').addEventListener('load', () => centreOn(start), { once: true });
 
     let ticking = false;
     el.strip.addEventListener('scroll', () => {
@@ -673,7 +658,6 @@ function select(model, frame, play) {
         preview.img.dataset.slug = model.slug;
         preview.img.src = posterPath(model);
         retarget(preview.video, model);
-        preview.media.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
         preview.name.textContent = model.name;
         preview.meta.textContent = `${typeTitle(model)} · ${model.category}`;
         preview.bases.textContent = baseList(model);
@@ -693,16 +677,10 @@ function createFrame(model, index) {
     frame.className = 'frame';
     linkTo(frame, model);
     frame.title = model.name;
-    const known = ratios.get(model.slug);
-    if (known) frame.style.setProperty('--ratio', String(known));
 
     const picture = document.createElement('div');
     picture.className = 'frame-picture';
     const img = createPoster(model);
-    img.addEventListener('load', () => {
-        frame.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
-        if (selectedFrame === frame) preview.media.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
-    });
     guardPoster(img, picture);
     picture.appendChild(img);
     frame.appendChild(picture);
