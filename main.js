@@ -1,6 +1,7 @@
 /* ==========================================================================
    LoRA Archive: application logic
-   Loads models.json, renders category sections, and drives search + filters.
+   Loads models.json, fills the hero strip, the newest run, the favourites
+   ledger and the contact sheet, and drives search + filters.
    ========================================================================== */
 
 'use strict';
@@ -10,11 +11,11 @@
    -------------------------------------------------------------------------- */
 
 const ALL = '__all__';
-const RECENT = 'Most Recent';
 const FAVOURITES = 'My Favourites';
 
-/* Curated "most recent" shelf, newest first. Names must match models.json;
-   anything missing is skipped silently so the shelf never breaks the page. */
+/* Curated "newest" run, newest first. The first one is lifted out of the run.
+   Names must match models.json; anything missing is skipped silently so the
+   run never breaks the page. */
 const RECENT_MODELS = [
     'Clay Model',
     'Messy Type',
@@ -27,7 +28,7 @@ const RECENT_MODELS = [
     'Hallucination'
 ];
 
-/* Curated favourites shelf, shown directly below Most Recent. Names must match models.json. */
+/* Curated favourites, shown as the ledger and as a filter. Names must match models.json. */
 const FAVOURITE_MODELS = [
     'Industrial Design Anima Style Rendering',
     'HeptapodB',
@@ -42,6 +43,26 @@ const FAVOURITE_MODELS = [
     'Alien X Zynthar',
     'Steampunk X Skull Mask',
     'Devanagari X Graffiti'
+];
+
+/* Posters for the hero strip. Their order is shuffled on every visit, so the
+   frame that starts in the middle is different each time. */
+const STRIP_MODELS = [
+    'Industrial Design Anima Style Rendering',
+    'HeptapodB',
+    'Hallucination',
+    'Journal Sketching',
+    'Exclusion',
+    'Neon X Drive',
+    'Brown Anime Portrait',
+    'Devanagari X Graffiti',
+    'Cyberpunk X Robot',
+    'Alien X Dravuun',
+    'Clay Model',
+    'Messy Type',
+    'Steampunk X Skull Mask',
+    'Industrial Design X Marker Rendering',
+    'Temporal Shift'
 ];
 
 const FAVOURITE_SET = new Set(FAVOURITE_MODELS);
@@ -86,34 +107,16 @@ const BASE_LABELS = {
 };
 
 const baseLabel = tag => BASE_LABELS[tag] || tag;
+const baseList = model => model.tags.map(baseLabel).join(', ');
 
-/* What a LoRA teaches the model. `type` in models.json is one of these keys;
-   `short` is the two letters on the card disc, coloured per type in CSS. */
+/* What a LoRA teaches the model. `type` in models.json is one of these keys. */
 const LORA_TYPES = {
-    character: { label: 'Characters', short: 'Ch', title: 'Character LoRA' },
-    style: { label: 'Styles', short: 'St', title: 'Style LoRA' },
-    concept: { label: 'Concepts', short: 'Co', title: 'Concept LoRA' }
+    character: { label: 'Characters', title: 'Character LoRA' },
+    style: { label: 'Styles', title: 'Style LoRA' },
+    concept: { label: 'Concepts', title: 'Concept LoRA' }
 };
 
-/** The small lettered disc that marks a card's (or chip's) LoRA type. */
-function createTypeDisc(type, className) {
-    const disc = document.createElement('span');
-    disc.className = `type-disc type-${type} ${className}`;
-    disc.textContent = LORA_TYPES[type].short;
-    disc.setAttribute('aria-hidden', 'true');
-    return disc;
-}
-
-/* Curated posters for the hero mosaic, in reading order (three per row).
-   Names must match models.json; anything missing is skipped. */
-const MOSAIC_MODELS = [
-    'Industrial Design Anima Style Rendering',
-    'HeptapodB',
-    'Hallucination',
-    'Journal Sketching',
-    'Exclusion',
-    'Neon X Drive'
-];
+const typeTitle = model => (model.type ? LORA_TYPES[model.type].title : 'LoRA');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -137,12 +140,22 @@ const el = {
     categoryFilters: document.getElementById('category-filters'),
     baseFilters: document.getElementById('base-filters'),
     typeFilters: document.getElementById('type-filters'),
-    progressBar: document.getElementById('progress-bar'),
     toTop: document.getElementById('to-top'),
     toolbar: document.getElementById('toolbar'),
     filtersToggle: document.getElementById('filters-toggle'),
     filtersCount: document.getElementById('filters-toggle-count'),
-    mosaic: document.getElementById('hero-mosaic')
+    strip: document.getElementById('strip'),
+    stripCaption: document.getElementById('strip-caption'),
+    newestRun: document.getElementById('newest-run'),
+    newestNote: document.getElementById('newest-note'),
+    ledger: document.getElementById('ledger-list'),
+    ledgerMore: document.getElementById('ledger-more'),
+    ledgerPreview: document.getElementById('ledger-preview'),
+    preview: document.getElementById('preview'),
+    heroCount: document.getElementById('hero-count'),
+    heroBases: document.getElementById('hero-bases'),
+    tallyBases: document.getElementById('tally-bases'),
+    tallySubjects: document.getElementById('tally-subjects')
 };
 
 /* --------------------------------------------------------------------------
@@ -175,7 +188,7 @@ async function loadModels() {
 function prepare(models) {
     return models.map(model => {
         const tags = Array.isArray(model.tags) ? model.tags : [];
-        // An unknown or missing type leaves the card without a disc rather than breaking it.
+        // An unknown or missing type leaves the model untyped rather than breaking it.
         const type = LORA_TYPES[model.type] ? model.type : null;
         return Object.assign({}, model, {
             tags,
@@ -187,6 +200,9 @@ function prepare(models) {
         });
     });
 }
+
+const byNames = (names, models) =>
+    names.map(name => models.find(model => model.name === name)).filter(Boolean);
 
 function orderedCategories(models) {
     const present = new Set(models.map(m => m.category));
@@ -203,28 +219,20 @@ function orderedBases(models) {
     return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
+const posterPath = model => `media/${encodeURIComponent(model.slug)}.webp`;
+const videoPath = model => `media/${encodeURIComponent(model.slug)}.mp4`;
+
+/* Natural poster proportions, learned as each poster loads, so the enlarged
+   preview can take the same shape as the frame it enlarges. */
+const ratios = new Map();
+
 /* --------------------------------------------------------------------------
-   Video: previews play on hover with a mouse, or while a card is mostly in
-   view on touch screens. An .mp4 is only fetched the first time it is wanted.
+   Video: previews play when the pointer rests on a model, or when the hero
+   strip brings one to the middle. An .mp4 is only fetched the first time it
+   is wanted. Data saver and reduced motion keep to posters unless asked.
    -------------------------------------------------------------------------- */
 
-const AUTOPLAY_RATIO = 0.6;
-
-/* Touch screens have no hover, so a card plays once it is mostly on screen.
-   Data saver and reduced motion keep to posters. */
-const autoplayOnScroll = () => !canHover.matches && !saveData && !prefersReducedMotion.matches;
-
-const videoObserver = 'IntersectionObserver' in window
-    ? new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.intersectionRatio >= AUTOPLAY_RATIO) {
-                startVideo(entry.target);
-            } else {
-                stopVideo(entry.target);
-            }
-        });
-    }, { threshold: [0, AUTOPLAY_RATIO] })
-    : null;
+const canAutoplay = () => !saveData && !prefersReducedMotion.matches;
 
 function startVideo(video) {
     if (video.dataset.failed === 'true') return;
@@ -242,7 +250,7 @@ function stopVideo(video) {
 }
 
 function playVideo(video) {
-    // A slow download can finish after the pointer has already left the card.
+    // A slow download can finish after the pointer has already left.
     if (!video.src || video.dataset.failed === 'true' || video.dataset.wanted !== 'true') return;
     const attempt = video.play();
     if (attempt && typeof attempt.then === 'function') {
@@ -254,23 +262,6 @@ function playVideo(video) {
     }
 }
 
-/**
- * The fallback tile sits behind the poster and the video, so it only ever shows
- * through when neither of them has anything to paint.
- */
-function showFallback(media) {
-    if (media.querySelector('.card-media-fallback')) return;
-    const fallback = document.createElement('div');
-    fallback.className = 'card-media-fallback';
-    fallback.textContent = 'No preview';
-    media.appendChild(fallback);
-}
-
-function clearFallback(media) {
-    const fallback = media.querySelector('.card-media-fallback');
-    if (fallback) fallback.remove();
-}
-
 function createVideo(src, poster) {
     const video = document.createElement('video');
     video.muted = true;
@@ -278,273 +269,594 @@ function createVideo(src, poster) {
     video.playsInline = true;
     video.loop = true;
     video.preload = 'none';
-    video.poster = poster;
+    if (poster) video.poster = poster;
     video.setAttribute('muted', '');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
     video.setAttribute('loop', '');
     video.setAttribute('aria-hidden', 'true');
     video.tabIndex = -1;
-    video.dataset.src = src;
+    if (src) video.dataset.src = src;
 
     video.addEventListener('loadeddata', () => playVideo(video));
     video.addEventListener('error', () => {
+        // A shared preview video is reused for other models, so it is only
+        // marked as failed for the source that failed.
         video.dataset.failed = 'true';
-        video.remove();
+        video.classList.remove('is-playing');
     });
 
     return video;
+}
+
+/** Point a shared preview video at another model, keeping it stopped until asked. */
+function retarget(video, model) {
+    stopVideo(video);
+    video.removeAttribute('src');
+    video.load();
+    video.dataset.failed = 'false';
+    video.dataset.src = videoPath(model);
+    video.poster = posterPath(model);
+}
+
+function createPoster(model, { lazy = true, alt } = {}) {
+    const img = document.createElement('img');
+    img.src = posterPath(model);
+    img.alt = alt === undefined ? `Preview of the ${model.name} LoRA` : alt;
+    if (lazy) img.loading = 'lazy';
+    img.decoding = 'async';
+    img.draggable = false;
+    img.addEventListener('load', () => {
+        if (img.naturalWidth && img.naturalHeight) {
+            ratios.set(model.slug, img.naturalWidth / img.naturalHeight);
+        }
+    });
+    return img;
+}
+
+/**
+ * The fallback tile sits behind the poster, so it only ever shows through
+ * when the poster has nothing to paint.
+ */
+function guardPoster(img, media) {
+    let retried = false;
+    img.addEventListener('error', () => {
+        if (!retried) {
+            // A dropped request (a flaky connection, or one of 80-odd posters
+            // losing its turn) should not blank the frame permanently.
+            retried = true;
+            setTimeout(() => { img.src = `${img.src.split('?')[0]}?retry=1`; }, 700);
+            return;
+        }
+        img.hidden = true;
+        if (media.querySelector('.card-media-fallback')) return;
+        const fallback = document.createElement('div');
+        fallback.className = 'card-media-fallback';
+        fallback.textContent = 'No preview';
+        media.appendChild(fallback);
+    });
+}
+
+function linkTo(anchor, model, verb = 'Open') {
+    const name = model.type ? `${model.name}, ${LORA_TYPES[model.type].title}` : model.name;
+    if (model.civitaiUrl) {
+        // A real link, so middle-click, open-in-new-tab and copy-link all work.
+        anchor.href = model.civitaiUrl;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        anchor.setAttribute('aria-label', `${verb} ${name} on Civitai`);
+    } else {
+        anchor.setAttribute('aria-label', name);
+    }
 }
 
 /* --------------------------------------------------------------------------
    Entrance motion: reveal as each element scrolls into view
    -------------------------------------------------------------------------- */
 
+/* Elements still waiting to arrive. An anchor link or a fast flick can jump
+   clean over an element, which then never intersects, so anything above the
+   bottom of the screen is shown on the next scroll whether it was seen or not. */
+const pendingReveals = new Set();
+
+const showReveal = element => {
+    element.classList.add('in');
+    pendingReveals.delete(element);
+    if (revealObserver) revealObserver.unobserve(element);
+};
+
 const revealObserver = 'IntersectionObserver' in window
-    ? new IntersectionObserver((entries, observer) => {
+    ? new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('in');
-            observer.unobserve(entry.target);
+            if (entry.isIntersecting) showReveal(entry.target);
         });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 })
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 })
     : null;
 
+let revealTicking = false;
+window.addEventListener('scroll', () => {
+    if (revealTicking || !pendingReveals.size) return;
+    revealTicking = true;
+    requestAnimationFrame(() => {
+        revealTicking = false;
+        pendingReveals.forEach(element => {
+            if (!element.isConnected) {
+                pendingReveals.delete(element);
+            } else if (element.getBoundingClientRect().top < window.innerHeight) {
+                showReveal(element);
+            }
+        });
+    });
+}, { passive: true });
+
 /**
- * @param {number} stagger index within its row, so grids cascade rather than
- *   popping in as one block.
+ * @param {number} stagger index within its group, so the parts of a section
+ *   arrive in reading order rather than as one block.
+ * @param {'reveal'|'reveal-frame'} kind text rises; frames settle from a scale.
  */
-function reveal(element, stagger) {
+function reveal(element, stagger = 0, kind = 'reveal') {
     // Without an observer, or with motion turned down, show it outright, and
     // never leave content stranded at opacity 0.
     if (!revealObserver || prefersReducedMotion.matches) {
-        element.classList.add('reveal', 'in');
+        element.classList.add(kind, 'in');
         return;
     }
-    element.classList.add('reveal');
-    if (stagger) element.style.transitionDelay = `${(stagger % 5) * 55}ms`;
+    element.classList.add(kind);
+    if (stagger) element.style.setProperty('--delay', `${(stagger % 8) * 70}ms`);
+    pendingReveals.add(element);
     revealObserver.observe(element);
 }
 
+/** Static parts of the page, revealed in the order they are read. */
+function revealStatic() {
+    const groups = [
+        ['#newest .newest-side > *'],
+        ['#favourites .section-title'],
+        ['#archive .archive-head > *'],
+        ['#about .about-row > *'],
+        ['#proof .proof-title span', '#proof .proof-note'],
+        ['#contact > *']
+    ];
+    groups.forEach(selectors => {
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach((node, index) => reveal(node, index));
+        });
+    });
+    document.querySelectorAll('#proof tbody tr:not(.group-gap)').forEach((row, index) => reveal(row, index % 5));
+    document.querySelectorAll('.tally li').forEach((item, index) => reveal(item, index % 6));
+}
+
 /* --------------------------------------------------------------------------
-   Rendering
+   Hero strip: a row of posters wider than the screen. Whatever comes to rest
+   in the middle is lit and plays; the rest wait in the dark.
    -------------------------------------------------------------------------- */
 
-/**
- * @param {boolean} showCategory only where cards from several categories sit
- *   together; inside a category section the heading already says it.
- */
-function createCard(model, index, showCategory) {
-    // An anchor (rather than a click handler) so cards support middle-click,
-    // open-in-new-tab and copy-link like any other link.
-    const card = document.createElement('a');
-    card.className = 'model-card';
-    // The label replaces the card's content for screen readers, so it carries
-    // the type the disc shows visually.
-    const name = model.type ? `${model.name}, ${LORA_TYPES[model.type].title}` : model.name;
-    if (model.civitaiUrl) {
-        card.href = model.civitaiUrl;
-        card.target = '_blank';
-        card.rel = 'noopener noreferrer';
-        card.setAttribute('aria-label', `Open ${name} on Civitai`);
-    } else {
-        card.setAttribute('aria-label', name);
+function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
     }
-    reveal(card, index);
+    return copy;
+}
 
-    const media = document.createElement('div');
-    media.className = 'card-media';
+function buildStrip(models) {
+    if (!el.strip) return;
+    const picks = shuffle(byNames(STRIP_MODELS, models));
+    if (!picks.length) return;
 
-    const slug = encodeURIComponent(model.slug);
-    const posterPath = `media/${slug}.webp`;
-    const videoPath = `media/${slug}.mp4`;
+    picks.forEach((model, index) => {
+        const frame = document.createElement('a');
+        frame.className = 'strip-frame';
+        frame.draggable = false;
+        linkTo(frame, model);
+        frame.style.setProperty('--i', String(Math.min(index, 8)));
+        frame.dataset.name = model.name;
+        frame.dataset.meta = `${typeTitle(model)} · ${baseList(model)}`;
 
-    const poster = document.createElement('img');
-    poster.className = 'card-poster';
-    poster.src = posterPath;
-    poster.alt = `Preview of the ${model.name} LoRA`;
-    poster.loading = 'lazy';
-    poster.decoding = 'async';
-    poster.width = 600;
-    poster.height = 800;
+        const img = createPoster(model, { lazy: index > 6, alt: '' });
+        img.addEventListener('load', () => {
+            frame.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
+            if (frame.classList.contains('is-centre')) alignCaption(frame);
+        });
+        guardPoster(img, frame);
+        frame.appendChild(img);
 
-    let retried = false;
-    poster.addEventListener('error', () => {
-        if (!retried) {
-            // A dropped request (a flaky connection, or one of 70-odd posters
-            // losing its turn) should not blank the card permanently.
-            retried = true;
-            setTimeout(() => { poster.src = `${posterPath}?retry=1`; }, 700);
-            return;
+        const video = createVideo(videoPath(model), posterPath(model));
+        frame.appendChild(video);
+
+        const shade = document.createElement('span');
+        shade.className = 'frame-shade';
+        frame.appendChild(shade);
+
+        frame.addEventListener('focus', () => {
+            frame.scrollIntoView({ inline: 'center', block: 'nearest', behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
+        });
+
+        el.strip.appendChild(frame);
+    });
+
+    // Start a few frames in, so posters run off both edges from the first paint.
+    const start = el.strip.children[Math.min(3, el.strip.children.length - 1)];
+    const centreOn = frame => {
+        el.strip.scrollLeft = frame.offsetLeft + frame.offsetWidth / 2 - el.strip.clientWidth / 2;
+    };
+    centreOn(start);
+    // The first poster's real width is only known once it loads.
+    start.querySelector('img').addEventListener('load', () => centreOn(start), { once: true });
+
+    let ticking = false;
+    el.strip.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            findCentre();
+        });
+    }, { passive: true });
+    window.addEventListener('resize', findCentre, { passive: true });
+
+    initStripDrag();
+    findCentre();
+}
+
+let centreFrame = null;
+let centreTimer;
+
+function findCentre() {
+    const middle = el.strip.getBoundingClientRect().left + el.strip.clientWidth / 2;
+    let nearest = null;
+    let distance = Infinity;
+    for (const frame of el.strip.children) {
+        const box = frame.getBoundingClientRect();
+        const d = Math.abs(box.left + box.width / 2 - middle);
+        if (d < distance) {
+            distance = d;
+            nearest = frame;
         }
-        poster.hidden = true;
-        showFallback(media);
-    });
-
-    poster.addEventListener('load', () => {
-        poster.hidden = false;
-        clearFallback(media);
-    });
-
-    media.appendChild(poster);
-
-    const video = createVideo(videoPath, posterPath);
-    media.appendChild(video);
-    if (canHover.matches) {
-        card.addEventListener('mouseenter', () => startVideo(video));
-        card.addEventListener('mouseleave', () => stopVideo(video));
-        card.addEventListener('focus', () => startVideo(video));
-        card.addEventListener('blur', () => stopVideo(video));
-    } else if (videoObserver && autoplayOnScroll()) {
-        videoObserver.observe(video);
     }
-
-    // A model can target several bases, so every one gets its own badge. The base
-    // being filtered on leads, otherwise a Flux search shows cards led by SD1.
-    if (model.tags.length) {
-        const ordered = model.tags.includes(state.base)
-            ? [state.base].concat(model.tags.filter(tag => tag !== state.base))
-            : model.tags;
-
-        const badges = document.createElement('div');
-        badges.className = 'card-badges';
-        ordered.forEach(tag => {
-            const badge = document.createElement('span');
-            badge.className = 'card-badge';
-            badge.textContent = baseLabel(tag);
-            badges.appendChild(badge);
-        });
-        media.appendChild(badges);
-    }
-
-    if (model.type) {
-        const disc = createTypeDisc(model.type, 'card-type');
-        disc.title = LORA_TYPES[model.type].title;
-        media.appendChild(disc);
-    }
-
-    if (model.civitaiUrl) {
-        const cta = document.createElement('span');
-        cta.className = 'card-cta';
-        cta.textContent = 'View on Civitai ↗';
-        media.appendChild(cta);
-    }
-
-    const body = document.createElement('div');
-    body.className = 'card-body';
-
-    const title = document.createElement('h3');
-    title.className = 'card-title';
-    title.textContent = model.name;
-    body.appendChild(title);
-
-    if (showCategory) {
-        const meta = document.createElement('p');
-        meta.className = 'card-meta';
-        // Bases live in the badges, so the meta line carries only the category.
-        meta.textContent = model.category;
-        body.appendChild(meta);
-    }
-
-    card.appendChild(media);
-    card.appendChild(body);
-    return card;
+    if (nearest && nearest !== centreFrame) setCentre(nearest);
 }
 
-/**
- * @param {object} [options]
- * @param {boolean} [options.shelf] one sideways-scrolling row instead of a grid.
- * @param {boolean} [options.showCategory] label each card with its category.
- * @param {Function} [options.onSeeAll] adds a "See all" button that calls this.
- */
-function createSection(title, models, options = {}) {
-    const section = document.createElement('section');
-    section.className = options.shelf ? 'category-section is-shelf' : 'category-section';
+function setCentre(frame) {
+    if (centreFrame) {
+        centreFrame.classList.remove('is-centre');
+        stopVideo(centreFrame.querySelector('video'));
+    }
+    centreFrame = frame;
+    frame.classList.add('is-centre');
+    el.stripCaption.replaceChildren(document.createTextNode(`${frame.dataset.name} `));
+    const meta = document.createElement('span');
+    meta.textContent = frame.dataset.meta;
+    el.stripCaption.appendChild(meta);
+    alignCaption(frame);
 
-    const header = document.createElement('div');
-    header.className = 'category-header';
-    header.id = `section-${slugify(title)}`;
+    // Wait for the row to settle, so flicking past ten posters fetches no video.
+    clearTimeout(centreTimer);
+    if (!canAutoplay()) return;
+    centreTimer = setTimeout(() => {
+        if (centreFrame === frame) startVideo(frame.querySelector('video'));
+    }, 450);
+}
 
-    const heading = document.createElement('h2');
-    heading.className = 'category-title';
-    heading.textContent = title;
-    if (title === FAVOURITES) heading.prepend(createHeartIcon('category-icon', 20));
+/** The caption sits under the lit frame, aligned to its left edge. */
+function alignCaption(frame) {
+    if (window.matchMedia('(max-width: 40em)').matches) return;
+    el.stripCaption.style.setProperty('--caption-w', `${frame.offsetWidth}px`);
+}
 
-    const count = document.createElement('span');
-    count.className = 'category-count';
-    count.textContent = `${models.length} ${models.length === 1 ? 'model' : 'models'}`;
+/** With a mouse the strip can be pulled sideways; touch and trackpads scroll it natively. */
+function initStripDrag() {
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+    let pointer = null;
 
-    header.appendChild(heading);
-    header.appendChild(count);
-    section.appendChild(header);
-    reveal(header, 0);
+    el.strip.addEventListener('pointerdown', event => {
+        if (event.pointerType !== 'mouse' || event.button !== 0) return;
+        pointer = event.pointerId;
+        startX = event.clientX;
+        startScroll = el.strip.scrollLeft;
+        moved = false;
+    });
 
-    const grid = document.createElement('div');
-    grid.className = 'category-grid';
-    models.forEach((model, index) => grid.appendChild(createCard(model, index, options.showCategory)));
-    section.appendChild(grid);
+    el.strip.addEventListener('pointermove', event => {
+        if (event.pointerId !== pointer) return;
+        const dx = event.clientX - startX;
+        if (!moved && Math.abs(dx) > 5) {
+            moved = true;
+            el.strip.classList.add('is-dragging');
+            el.strip.setPointerCapture(pointer);
+        }
+        if (moved) el.strip.scrollLeft = startScroll - dx;
+    });
 
-    if (options.shelf) header.appendChild(createShelfNav(grid, title, options.onSeeAll));
+    const release = event => {
+        if (event.pointerId !== pointer) return;
+        pointer = null;
+        // Dropping the class hands the row back to scroll snapping, which settles it.
+        el.strip.classList.remove('is-dragging');
+    };
+    el.strip.addEventListener('pointerup', release);
+    el.strip.addEventListener('pointercancel', release);
 
-    return section;
+    // A drag that ends over a poster is not a click on it.
+    el.strip.addEventListener('click', event => {
+        if (moved) {
+            event.preventDefault();
+            moved = false;
+        }
+    }, true);
 }
 
 /* --------------------------------------------------------------------------
-   Shelves: arrow buttons that page a sideways row, disabled at either end
+   Newest: a run of frames with the newest lifted out of it
    -------------------------------------------------------------------------- */
 
-const shelfUpdaters = [];
+function buildNewest(models) {
+    const recent = byNames(RECENT_MODELS, models);
+    if (!recent.length) return;
 
-function createShelfNav(grid, title, onSeeAll) {
-    const nav = document.createElement('div');
-    nav.className = 'shelf-nav';
+    recent.forEach((model, index) => {
+        const frame = document.createElement('a');
+        frame.className = index === 0 ? 'run-frame is-lifted' : 'run-frame';
+        linkTo(frame, model);
 
-    if (onSeeAll) {
-        const seeAll = document.createElement('button');
-        seeAll.type = 'button';
-        seeAll.className = 'shelf-see-all';
-        seeAll.textContent = 'See all';
-        seeAll.setAttribute('aria-label', `See all of ${title}`);
-        seeAll.addEventListener('click', onSeeAll);
-        nav.appendChild(seeAll);
+        const picture = document.createElement('div');
+        picture.className = 'run-picture';
+        const img = createPoster(model);
+        guardPoster(img, picture);
+        picture.appendChild(img);
+        const video = createVideo(videoPath(model), posterPath(model));
+        picture.appendChild(video);
+        frame.appendChild(picture);
+        attachHoverVideo(frame, video);
+
+        const caption = document.createElement('p');
+        caption.className = 'run-caption';
+        caption.setAttribute('aria-hidden', 'true');
+        const name = document.createElement('span');
+        name.textContent = model.name;
+        const base = document.createElement('span');
+        base.textContent = baseLabel(model.tags[0] || '');
+        caption.append(name, base);
+        frame.appendChild(caption);
+
+        reveal(frame, index, 'reveal-frame');
+        el.newestRun.appendChild(frame);
+    });
+
+    const newest = recent[0];
+    const kind = newest.type ? `a ${newest.type} LoRA` : 'a LoRA';
+    el.newestNote.textContent = `${newest.name} is the latest, ${kind} for ${baseList(newest)}.`;
+}
+
+function attachHoverVideo(target, video) {
+    if (!canHover.matches) return;
+    target.addEventListener('mouseenter', () => startVideo(video));
+    target.addEventListener('mouseleave', () => stopVideo(video));
+    target.addEventListener('focus', () => startVideo(video));
+    target.addEventListener('blur', () => stopVideo(video));
+}
+
+/* --------------------------------------------------------------------------
+   Favourites: a ledger of names, with the poster beside the row in hand
+   -------------------------------------------------------------------------- */
+
+let restLedger = null;
+
+function buildLedger(models) {
+    const favourites = byNames(FAVOURITE_MODELS, models);
+    const previewImg = document.createElement('img');
+    previewImg.alt = '';
+    const previewVideo = createVideo(null, null);
+    el.ledgerPreview.append(previewImg, previewVideo);
+
+    favourites.forEach((model, index) => {
+        const item = document.createElement('li');
+        const row = document.createElement('a');
+        row.className = 'ledger-row';
+        linkTo(row, model);
+
+        // Phones have no hover preview, so the first row carries its own picture.
+        if (index === 0) {
+            const thumb = createPoster(model, { alt: '' });
+            thumb.className = 'ledger-thumb';
+            row.appendChild(thumb);
+        }
+
+        const name = document.createElement('span');
+        name.className = 'ledger-name';
+        name.textContent = model.name;
+        const kind = document.createElement('span');
+        kind.className = 'ledger-kind';
+        kind.textContent = model.category;
+        const base = document.createElement('span');
+        base.className = 'ledger-base';
+        base.textContent = baseLabel(model.tags[0] || '');
+        row.append(name, kind, base);
+
+        const show = play => {
+            el.ledgerPreview.style.top = `${item.offsetTop - 8}px`;
+            if (previewImg.dataset.slug !== model.slug) {
+                previewImg.dataset.slug = model.slug;
+                previewImg.src = posterPath(model);
+                retarget(previewVideo, model);
+            }
+            el.ledgerPreview.classList.add('is-visible');
+            if (play && !saveData) startVideo(previewVideo);
+        };
+        row.addEventListener('mouseenter', () => show(true));
+        row.addEventListener('focus', () => show(true));
+        row.addEventListener('blur', () => stopVideo(previewVideo));
+        if (index === 0) restLedger = () => show(false);
+
+        item.appendChild(row);
+        reveal(item, index);
+        el.ledger.appendChild(item);
+    });
+
+    // Leaving the list brings the preview back to the first row and stills it.
+    el.ledger.addEventListener('mouseleave', () => {
+        stopVideo(previewVideo);
+        if (restLedger) restLedger();
+    });
+    if (restLedger) {
+        // Row offsets are only right once the fonts have set the list.
+        restLedger();
+        if (document.fonts) document.fonts.ready.then(restLedger);
     }
 
-    const arrow = (direction, label, path) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'icon-btn';
-        button.setAttribute('aria-label', `${label}: ${title}`);
-        button.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="${path}"></path></svg>`;
-        button.addEventListener('click', () => {
-            grid.scrollBy({
-                left: direction * grid.clientWidth * 0.9,
-                behavior: prefersReducedMotion.matches ? 'auto' : 'smooth'
-            });
+    el.ledgerMore.addEventListener('click', () => {
+        state.category = FAVOURITES;
+        setFilterPanel(false);
+        render();
+        scrollToResults();
+    });
+    reveal(el.ledgerMore, favourites.length);
+}
+
+/* --------------------------------------------------------------------------
+   The contact sheet: one run of frames per category, and one enlarged frame
+   beside it for whatever the pointer rests on
+   -------------------------------------------------------------------------- */
+
+const preview = {};
+
+function buildPreview() {
+    preview.media = document.createElement('div');
+    preview.media.className = 'preview-media';
+    preview.img = document.createElement('img');
+    preview.img.alt = '';
+    preview.video = createVideo(null, null);
+    preview.media.append(preview.img, preview.video);
+
+    preview.name = document.createElement('h3');
+    preview.name.className = 'preview-name';
+    preview.meta = document.createElement('p');
+    preview.meta.className = 'preview-meta';
+    preview.bases = document.createElement('p');
+    preview.bases.className = 'preview-meta';
+    preview.link = document.createElement('a');
+    preview.link.className = 'button';
+    preview.link.textContent = 'Open on Civitai';
+    preview.link.target = '_blank';
+    preview.link.rel = 'noopener noreferrer';
+
+    el.preview.append(preview.media, preview.name, preview.meta, preview.bases, preview.link);
+}
+
+let selectedFrame = null;
+
+/** @param {boolean} play only when the visitor asked for it by pointing at a frame. */
+function select(model, frame, play) {
+    if (selectedFrame) selectedFrame.classList.remove('is-selected');
+    selectedFrame = frame;
+    if (frame) frame.classList.add('is-selected');
+
+    if (preview.img.dataset.slug !== model.slug) {
+        preview.img.dataset.slug = model.slug;
+        preview.img.src = posterPath(model);
+        retarget(preview.video, model);
+        preview.media.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
+        preview.name.textContent = model.name;
+        preview.meta.textContent = `${typeTitle(model)} · ${model.category}`;
+        preview.bases.textContent = baseList(model);
+        if (model.civitaiUrl) {
+            preview.link.href = model.civitaiUrl;
+            preview.link.hidden = false;
+            preview.link.setAttribute('aria-label', `Open ${model.name} on Civitai`);
+        } else {
+            preview.link.hidden = true;
+        }
+    }
+    if (play && !saveData) startVideo(preview.video);
+}
+
+function createFrame(model, index) {
+    const frame = document.createElement('a');
+    frame.className = 'frame';
+    linkTo(frame, model);
+    frame.title = model.name;
+    const known = ratios.get(model.slug);
+    if (known) frame.style.setProperty('--ratio', String(known));
+
+    const picture = document.createElement('div');
+    picture.className = 'frame-picture';
+    const img = createPoster(model);
+    img.addEventListener('load', () => {
+        frame.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
+        if (selectedFrame === frame) preview.media.style.setProperty('--ratio', String(ratios.get(model.slug) || 1));
+    });
+    guardPoster(img, picture);
+    picture.appendChild(img);
+    frame.appendChild(picture);
+
+    // Shown under each frame on touch screens, where there is no enlarged preview.
+    const name = document.createElement('span');
+    name.className = 'frame-name';
+    name.setAttribute('aria-hidden', 'true');
+    name.textContent = model.name;
+    frame.appendChild(name);
+
+    if (canHover.matches) {
+        frame.addEventListener('mouseenter', () => select(model, frame, true));
+    }
+    frame.addEventListener('focus', () => select(model, frame, true));
+
+    reveal(frame, index, 'reveal-frame');
+    return frame;
+}
+
+function createRun(title, models) {
+    const run = document.createElement('section');
+    run.className = 'run';
+    run.id = `section-${slugify(title)}`;
+    run.setAttribute('aria-labelledby', `${run.id}-title`);
+
+    const head = document.createElement('div');
+    head.className = 'run-head';
+    const heading = document.createElement('h3');
+    heading.className = 'run-title';
+    heading.id = `${run.id}-title`;
+    heading.textContent = title;
+    if (title === FAVOURITES) heading.prepend(createHeartIcon('category-icon', 13));
+    const count = document.createElement('p');
+    count.className = 'run-count';
+    count.textContent = `${models.length} ${models.length === 1 ? 'model' : 'models'}`;
+    head.append(heading, count);
+    run.appendChild(head);
+    reveal(head, 0);
+
+    const frames = document.createElement('div');
+    frames.className = 'run-frames';
+    models.forEach((model, index) => frames.appendChild(createFrame(model, index)));
+    run.appendChild(frames);
+
+    // Phones show the first two rows of an unfiltered run and fold the rest,
+    // so the eight subjects fit a few screens instead of seventeen.
+    if (!hasFilters() && models.length > RUN_PREVIEW) {
+        run.classList.add('is-folded');
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'text-link run-more';
+        more.textContent = `Show all ${models.length}`;
+        more.setAttribute('aria-label', `Show all ${models.length} ${title} models`);
+        more.addEventListener('click', () => {
+            run.classList.remove('is-folded');
+            more.remove();
+            // Hand focus to the first frame that was folded away.
+            const next = frames.children[RUN_PREVIEW];
+            if (next) next.focus({ preventScroll: true });
         });
-        nav.appendChild(button);
-        return button;
-    };
+        run.appendChild(more);
+    }
 
-    const prev = arrow(-1, 'Scroll back', 'M15 18l-6-6 6-6');
-    const next = arrow(1, 'Scroll forward', 'M9 18l6-6-6-6');
-
-    const update = () => {
-        const max = grid.scrollWidth - grid.clientWidth;
-        prev.disabled = grid.scrollLeft <= 1;
-        next.disabled = grid.scrollLeft >= max - 1;
-    };
-    grid.addEventListener('scroll', update, { passive: true });
-    shelfUpdaters.push(update);
-
-    return nav;
+    return run;
 }
 
-/** Shelf arrows can only be sized once the shelf is laid out on the page. */
-function refreshShelves() {
-    shelfUpdaters.forEach(update => update());
-}
+/** How many frames a folded run shows on a phone: two rows of three. */
+const RUN_PREVIEW = 6;
 
 function slugify(value) {
     return value.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -565,57 +877,48 @@ function matches(model, ignore) {
 function render() {
     const visible = allModels.filter(model => matches(model));
 
-    // Cards are rebuilt on every render, so drop the observers' stale targets.
-    if (videoObserver) videoObserver.disconnect();
-    if (revealObserver) revealObserver.disconnect();
-    shelfUpdaters.length = 0;
+    // Frames are rebuilt on every render, so drop the observer's stale targets
+    // (only the sheet's: the rest of the page may still be waiting to arrive).
+    if (revealObserver) {
+        el.grid.querySelectorAll('.reveal, .reveal-frame').forEach(node => {
+            revealObserver.unobserve(node);
+            pendingReveals.delete(node);
+        });
+    }
+    selectedFrame = null;
     el.grid.replaceChildren();
 
     if (!visible.length) {
         el.empty.hidden = false;
+        el.preview.hidden = true;
+        stopVideo(preview.video);
         updateChrome(0);
         return;
     }
     el.empty.hidden = true;
+    el.preview.hidden = false;
 
     const fragment = document.createDocumentFragment();
-
-    // The recent shelf duplicates models that also appear in their own category,
-    // so it is only useful on the unfiltered browse view.
-    if (!hasFilters()) {
-        const recent = RECENT_MODELS
-            .map(name => allModels.find(model => model.name === name))
-            .filter(Boolean);
-        if (recent.length) {
-            fragment.appendChild(createSection(RECENT, recent, { shelf: true, showCategory: true }));
-        }
-        const favourites = FAVOURITE_MODELS
-            .map(name => allModels.find(model => model.name === name))
-            .filter(Boolean);
-        if (favourites.length) {
-            fragment.appendChild(createSection(FAVOURITES, favourites, {
-                shelf: true,
-                showCategory: true,
-                onSeeAll: () => applyFilter('category', FAVOURITES)
-            }));
-        }
-    }
+    let first = null;
 
     if (state.category === FAVOURITES) {
         // Keep the curated order rather than regrouping by real category.
         const ordered = FAVOURITE_MODELS
             .map(name => visible.find(model => model.name === name))
             .filter(Boolean);
-        fragment.appendChild(createSection(FAVOURITES, ordered, { showCategory: true }));
+        fragment.appendChild(createRun(FAVOURITES, ordered));
+        first = ordered[0];
     } else {
         orderedCategories(visible).forEach(category => {
             const models = visible.filter(model => model.category === category);
-            if (models.length) fragment.appendChild(createSection(category, models));
+            if (!models.length) return;
+            if (!first) first = models[0];
+            fragment.appendChild(createRun(category, models));
         });
     }
 
     el.grid.appendChild(fragment);
-    refreshShelves();
+    if (first) select(first, el.grid.querySelector('.frame'), false);
     updateChrome(visible.length);
 }
 
@@ -679,7 +982,6 @@ function createChip(label, value, count) {
     chip.setAttribute('aria-pressed', 'false');
 
     if (value === FAVOURITES) chip.appendChild(createHeartIcon('chip-icon', 12));
-    if (LORA_TYPES[value]) chip.appendChild(createTypeDisc(value, 'chip-type'));
 
     const text = document.createElement('span');
     text.textContent = label;
@@ -769,42 +1071,13 @@ function initFilterPanel() {
     });
 }
 
-/* --------------------------------------------------------------------------
-   Hero mosaic: hand-picked posters, as a preview of what lies below
-   -------------------------------------------------------------------------- */
-
-function buildMosaic(models) {
-    if (!el.mosaic) return;
-    const picks = MOSAIC_MODELS
-        .map(name => models.find(model => model.name === name))
-        .filter(Boolean);
-
-    picks.forEach((model, index) => {
-        const tile = document.createElement('div');
-        tile.className = 'hero-tile';
-        const img = document.createElement('img');
-        img.alt = '';
-        img.decoding = 'async';
-        img.style.transitionDelay = `${index * 70}ms`;
-        img.addEventListener('load', () => img.classList.add('is-loaded'));
-        img.addEventListener('error', () => tile.remove());
-        img.src = `media/${encodeURIComponent(model.slug)}.webp`;
-        tile.appendChild(img);
-        el.mosaic.appendChild(tile);
-    });
-}
-
-
 /**
- * Bring the top of the results into view after a filter changes: down from the
+ * Bring the top of the sheet into view after a filter changes: down from the
  * hero, or back up when the re-render has left the reader mid-way through.
  */
 function scrollToResults() {
-    const main = document.getElementById('models');
-    const header = document.querySelector('.site-header');
-    const toolbar = document.getElementById('toolbar');
-    const offset = (header ? header.offsetHeight : 0) + (toolbar ? toolbar.offsetHeight : 0);
-    const top = main.getBoundingClientRect().top + window.pageYOffset - offset - 8;
+    const offset = el.toolbar ? el.toolbar.offsetHeight : 0;
+    const top = el.grid.getBoundingClientRect().top + window.pageYOffset - offset - 16;
     if (Math.abs(window.pageYOffset - top) > 2) {
         window.scrollTo({ top, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
     }
@@ -863,6 +1136,36 @@ function initSearch() {
 }
 
 /* --------------------------------------------------------------------------
+   Counts: the first screen and the about section read from the data, so a
+   new model updates them without touching the markup
+   -------------------------------------------------------------------------- */
+
+function fillCounts(models) {
+    const bases = orderedBases(models);
+    el.heroCount.textContent = models.length;
+    const labels = bases.map(([tag]) => baseLabel(tag)).filter((label, i, all) => all.indexOf(label) === i);
+    el.heroBases.textContent = labels.length > 1
+        ? `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`
+        : labels.join('');
+
+    const tally = (list, rows) => {
+        list.replaceChildren(...rows.map(([label, count]) => {
+            const item = document.createElement('li');
+            const name = document.createElement('span');
+            name.textContent = label;
+            const value = document.createElement('span');
+            value.textContent = count;
+            item.append(name, value);
+            return item;
+        }));
+    };
+
+    tally(el.tallyBases, bases.map(([tag, count]) => [baseLabel(tag), count]));
+    tally(el.tallySubjects, orderedCategories(models)
+        .map(category => [category, models.filter(model => model.category === category).length]));
+}
+
+/* --------------------------------------------------------------------------
    Shareable URLs
    -------------------------------------------------------------------------- */
 
@@ -873,7 +1176,7 @@ function syncUrl() {
     if (state.base !== ALL) params.set('base', state.base);
     if (state.type !== ALL) params.set('lora', state.type);
     const query = params.toString();
-    history.replaceState(null, '', query ? `?${query}` : location.pathname);
+    history.replaceState(null, '', query ? `?${query}${location.hash}` : `${location.pathname}${location.hash}`);
 }
 
 function readUrl(models) {
@@ -911,9 +1214,11 @@ function initTheme() {
 
     const apply = theme => {
         document.documentElement.setAttribute('data-theme', theme);
-        const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-        toggle.setAttribute('aria-label', label);
-        toggle.setAttribute('title', label);
+        toggle.textContent = theme === 'dark' ? 'Light theme' : 'Dark theme';
+    };
+
+    const saved = () => {
+        try { return localStorage.getItem('theme'); } catch (error) { return null; }
     };
 
     apply(document.documentElement.getAttribute('data-theme') || 'light');
@@ -921,26 +1226,25 @@ function initTheme() {
     toggle.addEventListener('click', () => {
         const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         apply(next);
-        localStorage.setItem('theme', next);
+        try { localStorage.setItem('theme', next); } catch (error) { /* private mode: the choice lasts this visit */ }
     });
 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-        if (!localStorage.getItem('theme')) apply(event.matches ? 'dark' : 'light');
+        if (!saved()) apply(event.matches ? 'dark' : 'light');
     });
 }
 
-/** Keep --toolbar-h in sync so section anchors clear the sticky chrome. */
+/** Keep --toolbar-h in sync so anchors and the sticky preview clear the toolbar. */
 function trackToolbarHeight() {
-    const toolbar = document.getElementById('toolbar');
-    if (!toolbar) return;
+    if (!el.toolbar) return;
 
     const measure = () => {
-        document.documentElement.style.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
+        document.documentElement.style.setProperty('--toolbar-h', `${el.toolbar.offsetHeight}px`);
     };
 
     measure();
     if ('ResizeObserver' in window) {
-        new ResizeObserver(measure).observe(toolbar);
+        new ResizeObserver(measure).observe(el.toolbar);
     } else {
         window.addEventListener('resize', measure, { passive: true });
     }
@@ -950,14 +1254,8 @@ function initScrollChrome() {
     let ticking = false;
 
     const update = () => {
-        const scrolled = window.pageYOffset;
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-
-        if (el.progressBar) {
-            el.progressBar.style.transform = `scaleX(${max > 0 ? Math.min(scrolled / max, 1) : 0})`;
-        }
         if (el.toTop) {
-            el.toTop.classList.toggle('is-visible', scrolled > 600);
+            el.toTop.classList.toggle('is-visible', window.pageYOffset > 900);
         }
         ticking = false;
     };
@@ -968,8 +1266,14 @@ function initScrollChrome() {
         window.requestAnimationFrame(update);
     }, { passive: true });
 
-    window.addEventListener('resize', update, { passive: true });
     update();
+
+    const footer = document.querySelector('.footer');
+    if (el.toTop && footer && 'IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+            el.toTop.classList.toggle('is-parked', entries[0].isIntersecting);
+        }).observe(footer);
+    }
 
     if (el.toTop) {
         el.toTop.addEventListener('click', () => {
@@ -992,6 +1296,7 @@ async function init() {
     initTheme();
     initScrollChrome();
     trackToolbarHeight();
+    revealStatic();
 
     try {
         allModels = prepare(await loadModels());
@@ -1008,13 +1313,16 @@ async function init() {
 
     el.loading.hidden = true;
 
-    buildMosaic(allModels);
+    fillCounts(allModels);
+    buildStrip(allModels);
+    buildNewest(allModels);
+    buildLedger(allModels);
+    buildPreview();
     buildFilters(allModels);
     initFilterPanel();
     initSearch();
     readUrl(allModels);
     render();
-    window.addEventListener('resize', refreshShelves, { passive: true });
 }
 
 if (document.readyState === 'loading') {
