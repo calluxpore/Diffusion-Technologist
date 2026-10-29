@@ -1113,17 +1113,6 @@ p {
 
 .about-contact {
     grid-column: 9 / 13;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.contact-picture {
-    border-radius: var(--radius);
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    background: var(--surface);
 }
 
 .contact-links {
@@ -1430,11 +1419,9 @@ p {
         max-width: 56ch;
     }
 
-    /* The contact sits under the story, picture beside the words. */
+    /* The contact sits under the story. */
     .about-contact {
         grid-column: 1 / 13;
-        flex-direction: row;
-        align-items: flex-start;
     }
 }
 
@@ -1552,15 +1539,6 @@ p {
     .facts {
         grid-template-columns: 1fr 1fr;
         gap: 16px 24px;
-    }
-
-    .about-contact {
-        gap: 16px;
-    }
-
-    .contact-picture {
-        width: 96px;
-        height: 96px;
     }
 
     .footer {

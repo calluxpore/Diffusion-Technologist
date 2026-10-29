@@ -1153,9 +1153,22 @@ function trackToolbarHeight() {
 function initScrollChrome() {
     let ticking = false;
 
+    const body = document.getElementById('models');
+
     const update = () => {
         if (el.toTop) {
             el.toTop.classList.toggle('is-visible', window.pageYOffset > 900);
+        }
+        // At the end of the sheet the sticky preview is pushed up by its column
+        // while the toolbar stays pinned, and would slide under it. The toolbar
+        // is pushed up just as far, so it always stays clear above the preview.
+        if (el.toolbar && body && el.preview.offsetParent) {
+            const toolbarH = el.toolbar.offsetHeight;
+            const needed = toolbarH + 24 + el.preview.offsetHeight;
+            const overlap = Math.min(toolbarH, Math.max(0, needed - body.getBoundingClientRect().bottom));
+            el.toolbar.style.transform = overlap ? `translateY(${-overlap}px)` : '';
+        } else if (el.toolbar) {
+            el.toolbar.style.transform = '';
         }
         ticking = false;
     };
