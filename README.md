@@ -23,7 +23,7 @@ from Google Fonts. The hero is a black field in both themes so the posters are i
   two rows behind a "Show all" link while nothing is filtered
 - The Civitai badges under the hero paragraph: pictures only, each named in the line beneath
   it on hover or keyboard focus
-- A short about section and a contact close
+- One closing section: a short bio with the training and licence facts, and how to get in touch
 - A compact pinned toolbar: search and filters inline on desktop, with the chips folded behind a
   Filters button on phones and tablets
 - Video previews play on hover or focus, and in the middle of the hero strip. Each `.mp4`

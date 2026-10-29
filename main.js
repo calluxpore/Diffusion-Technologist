@@ -399,8 +399,7 @@ function revealStatic() {
     const groups = [
         ['#newest .newest-side > *'],
         ['#archive .archive-head > *'],
-        ['#about .about-row > *'],
-        ['#contact > *']
+        ['#about .about-main > *', '#about .about-contact']
     ];
     groups.forEach(selectors => {
         selectors.forEach(selector => {
