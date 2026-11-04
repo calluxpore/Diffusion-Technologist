@@ -1240,7 +1240,7 @@ p {
 
     .js .reveal {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(16px);
         transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-expo);
         transition-delay: var(--delay, 0ms);
     }
@@ -1253,7 +1253,7 @@ p {
     /* A frame settles from a slight scale rather than rising like the text. */
     .js .reveal-frame {
         opacity: 0;
-        transform: scale(0.96);
+        transform: scale(0.98);
         transition: opacity 600ms var(--ease-out), transform 800ms var(--ease-expo);
         transition-delay: var(--delay, 0ms);
     }
@@ -1262,6 +1262,18 @@ p {
         opacity: 1;
         transform: none;
     }
+}
+
+/* Frames under a still pointer ignore it while the page moves past them. */
+.is-scrolling .strip,
+.is-scrolling .newest-run,
+.is-scrolling .sheet {
+    pointer-events: none;
+}
+
+/* A section focused by a followed anchor link needs no ring of its own. */
+[tabindex="-1"]:focus {
+    outline: none;
 }
 
 @keyframes load-line {

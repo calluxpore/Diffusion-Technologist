@@ -350,6 +350,13 @@ const showReveal = element => {
     element.classList.add('in');
     pendingReveals.delete(element);
     if (revealObserver) revealObserver.unobserve(element);
+    // Once it has arrived, drop the entrance classes: their slow, staggered
+    // transition would otherwise also govern the element's own hover fades.
+    element.addEventListener('transitionend', function settled(event) {
+        if (event.target !== element || event.propertyName !== 'transform') return;
+        element.removeEventListener('transitionend', settled);
+        element.classList.remove('reveal', 'reveal-frame', 'in');
+    });
 };
 
 const revealObserver = 'IntersectionObserver' in window
@@ -366,13 +373,17 @@ window.addEventListener('scroll', () => {
     revealTicking = true;
     requestAnimationFrame(() => {
         revealTicking = false;
+        // Measure everything first, then write: alternating the two would force
+        // a fresh layout for each element, right in the middle of the scroll.
+        const arrived = [];
         pendingReveals.forEach(element => {
             if (!element.isConnected) {
                 pendingReveals.delete(element);
             } else if (element.getBoundingClientRect().top < window.innerHeight) {
-                showReveal(element);
+                arrived.push(element);
             }
         });
+        arrived.forEach(showReveal);
     });
 }, { passive: true });
 
@@ -389,7 +400,7 @@ function reveal(element, stagger = 0, kind = 'reveal') {
         return;
     }
     element.classList.add(kind);
-    if (stagger) element.style.setProperty('--delay', `${(stagger % 8) * 70}ms`);
+    if (stagger) element.style.setProperty('--delay', `${(stagger % 8) * 40}ms`);
     pendingReveals.add(element);
     revealObserver.observe(element);
 }
@@ -474,6 +485,25 @@ function buildStrip(models) {
 
     initStripDrag();
     findCentre();
+    pauseStripOffscreen();
+}
+
+/** Nobody is watching the lit frame once the hero has scrolled away, so stop decoding it. */
+function pauseStripOffscreen() {
+    if (!('IntersectionObserver' in window)) return;
+    let hidden = false;
+    new IntersectionObserver(([entry]) => {
+        if (!centreFrame) return;
+        const video = centreFrame.querySelector('video');
+        if (!entry.isIntersecting) {
+            hidden = true;
+            clearTimeout(centreTimer);
+            stopVideo(video);
+        } else if (hidden) {
+            hidden = false;
+            if (canAutoplay()) startVideo(video);
+        }
+    }).observe(el.strip);
 }
 
 let centreFrame = null;
@@ -971,7 +1001,7 @@ function scrollToResults() {
     const offset = el.toolbar ? el.toolbar.offsetHeight : 0;
     const top = el.grid.getBoundingClientRect().top + window.pageYOffset - offset - 16;
     if (Math.abs(window.pageYOffset - top) > 2) {
-        window.scrollTo({ top, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
+        pageScroll.to(top);
     }
 }
 
@@ -1105,6 +1135,162 @@ function readUrl(models) {
 }
 
 /* --------------------------------------------------------------------------
+   Smooth scrolling: the mouse wheel glides instead of stepping, and jumps
+   (anchors, filters, back to top) ease in and out on one shared curve.
+   Touch, keyboard and scrollbar stay native, and always win over a glide.
+   -------------------------------------------------------------------------- */
+
+/* How quickly a glide closes on its target, per second. Lower is floatier. */
+const WHEEL_DAMPING = 8;
+const LINE_HEIGHT_PX = 40;
+
+/* Set by initScrollChrome: scroll-linked chrome, updated in the same frame as the move. */
+let syncScrollChrome = () => { };
+
+const pageScroll = (() => {
+    const root = document.documentElement;
+    let frame = 0;
+    let last = 0;
+    let position = 0;
+    let target = 0;
+    let tween = null;
+
+    const maxScroll = () => root.scrollHeight - window.innerHeight;
+    const clamp = top => Math.max(0, Math.min(top, maxScroll()));
+    const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+    const stop = () => {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        tween = null;
+    };
+
+    const tick = now => {
+        // Something else moved the page (scrollbar, focus, a layout change): it wins.
+        if (Math.abs(window.scrollY - position) > 2) {
+            stop();
+            return;
+        }
+
+        let done;
+        if (tween) {
+            const t = Math.min(Math.max(0, now - tween.start) / tween.duration, 1);
+            position = tween.from + (tween.to - tween.from) * easeInOut(t);
+            done = t === 1;
+        } else {
+            // Scaled by elapsed time, so the glide feels the same at 60 and 144 Hz.
+            const dt = Math.min(Math.max(0, now - last), 50) / 1000;
+            position += (target - position) * (1 - Math.exp(-WHEEL_DAMPING * dt));
+            done = Math.abs(target - position) < 0.5;
+            if (done) position = target;
+        }
+        last = now;
+
+        window.scrollTo({ top: position, behavior: 'instant' });
+        syncScrollChrome();
+
+        if (done) stop();
+        else frame = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+        last = performance.now();
+        if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    /** True when the wheel should move something inside the page rather than the page. */
+    const insideScroller = (node, delta) => {
+        for (; node && node !== document.body && node !== root; node = node.parentElement) {
+            if (node.scrollHeight <= node.clientHeight) continue;
+            const overflow = getComputedStyle(node).overflowY;
+            if (overflow !== 'auto' && overflow !== 'scroll') continue;
+            const hasRoom = delta < 0
+                ? node.scrollTop > 0
+                : node.scrollTop + node.clientHeight < node.scrollHeight - 1;
+            if (hasRoom) return true;
+        }
+        return false;
+    };
+
+    const onWheel = event => {
+        // Zoom, sideways scrolling and nested panels all keep their native behaviour.
+        if (prefersReducedMotion.matches || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (!event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+        if (insideScroller(event.target, event.deltaY)) return;
+
+        let delta = event.deltaY;
+        if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= LINE_HEIGHT_PX;
+        if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight;
+
+        if (!frame) position = window.scrollY;
+        // A wheel during a jump takes over from wherever the jump has got to.
+        const from = !frame || tween ? position : target;
+        const next = clamp(from + delta);
+        // Already at the end of the page: leave the browser its overscroll bounce.
+        if (!frame && next === position) return;
+
+        event.preventDefault();
+        tween = null;
+        target = next;
+        if (!frame) start();
+    };
+
+    /** Ease to a position on the page; longer distances take longer, up to a limit. */
+    const to = top => {
+        if (prefersReducedMotion.matches) {
+            window.scrollTo({ top, behavior: 'auto' });
+            return;
+        }
+        if (!frame) position = window.scrollY;
+        const end = clamp(top);
+        const distance = Math.abs(end - position);
+        tween = {
+            from: position,
+            to: end,
+            start: performance.now(),
+            duration: Math.min(450 + distance * 0.25, 1500)
+        };
+        start();
+    };
+
+    const onAnchorClick = event => {
+        if (prefersReducedMotion.matches || event.defaultPrevented || event.button) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href^="#"]');
+        const section = link && document.getElementById(decodeURIComponent(link.hash.slice(1)));
+        if (!section) return;
+
+        event.preventDefault();
+        history.pushState(null, '', link.hash);
+        // A followed anchor moves keyboard focus too, which the skip link relies on.
+        if (!section.hasAttribute('tabindex')) section.setAttribute('tabindex', '-1');
+        section.focus({ preventScroll: true });
+
+        const padding = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+        to(section.getBoundingClientRect().top + window.scrollY - padding);
+    };
+
+    /* While the page moves, frames slide under a still pointer. Ignoring them for
+       the moment avoids a hover fade across the sheet and a video fetch per frame. */
+    let idleTimer;
+    const onScroll = () => {
+        root.classList.add('is-scrolling');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => root.classList.remove('is-scrolling'), 140);
+    };
+
+    const init = () => {
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('touchstart', stop, { passive: true });
+        window.addEventListener('keydown', stop);
+        document.addEventListener('click', onAnchorClick);
+    };
+
+    return { init, to };
+})();
+
+/* --------------------------------------------------------------------------
    Page chrome
    -------------------------------------------------------------------------- */
 
@@ -1180,6 +1366,7 @@ function initScrollChrome() {
     }, { passive: true });
 
     update();
+    syncScrollChrome = update;
 
     const footer = document.querySelector('.footer');
     if (el.toTop && footer && 'IntersectionObserver' in window) {
@@ -1190,7 +1377,7 @@ function initScrollChrome() {
 
     if (el.toTop) {
         el.toTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: prefersReducedMotion.matches ? 'auto' : 'smooth' });
+            pageScroll.to(0);
         });
     }
 }
@@ -1208,6 +1395,7 @@ function showError(message) {
 async function init() {
     initTheme();
     initBadges();
+    pageScroll.init();
     initScrollChrome();
     trackToolbarHeight();
     revealStatic();

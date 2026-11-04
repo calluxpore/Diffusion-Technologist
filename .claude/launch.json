@@ -6,6 +6,12 @@
       "runtimeExecutable": "py",
       "runtimeArgs": ["-m", "http.server", "4173", "--bind", "127.0.0.1"],
       "port": 4173
+    },
+    {
+      "name": "site-node",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path'),r=process.cwd(),t={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.mp4':'video/mp4','.ttf':'font/ttf'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u==='/')u='/index.html';const a=p.join(r,p.normalize(u));if(!a.startsWith(r)||!f.existsSync(a)||f.statSync(a).isDirectory()){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':t[p.extname(a).toLowerCase()]||'application/octet-stream','Cache-Control':'no-store'});f.createReadStream(a).pipe(s)}).listen(process.env.PORT||4175,'127.0.0.1')"],
+      "port": 4175
     }
   ]
 }
