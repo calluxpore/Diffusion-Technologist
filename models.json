@@ -383,6 +383,16 @@
     ]
   },
   {
+    "name": "Horns",
+    "slug": "Horns",
+    "category": "Anime & Fantasy",
+    "type": "concept",
+    "civitaiUrl": "https://civitai.com/models/3057069/horns",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Impasto",
     "slug": "Impasto",
     "category": "Art Styles & Techniques",

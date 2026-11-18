@@ -17,6 +17,7 @@ const FAVOURITES = 'My Favourites';
    Names must match models.json; anything missing is skipped silently so the
    run never breaks the page. */
 const RECENT_MODELS = [
+    'Horns',
     'Clay Model',
     'Messy Type',
     'Meta Brown',
@@ -24,8 +25,7 @@ const RECENT_MODELS = [
     'Temporal Shift',
     'Face Tattoos',
     'Industrial Design Anima Style Rendering',
-    'HeptapodB',
-    'Hallucination'
+    'HeptapodB'
 ];
 
 /* Curated favourites, offered as a filter in the archive. Names must match models.json. */
