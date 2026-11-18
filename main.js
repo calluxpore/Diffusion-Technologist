@@ -1083,7 +1083,11 @@ function initBadges() {
     const show = badge => {
         const name = document.createElement('strong');
         name.textContent = badge.dataset.name;
-        readout.replaceChildren(name, document.createTextNode(` ${badge.dataset.note}`));
+        if (badge.dataset.note) {
+            readout.replaceChildren(name, document.createTextNode(` ${badge.dataset.note}`));
+        } else {
+            readout.replaceChildren(name);
+        }
     };
     const rest = () => { readout.textContent = resting; };
 
