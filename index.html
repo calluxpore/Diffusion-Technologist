@@ -12,8 +12,7 @@
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="LoRA Archive | Samarth Reddy">
-    <meta property="og:description"
-        content="Open-source LoRA model weights and fine-tuning experiments, free forever.">
+    <meta property="og:description" content="Open-source LoRA model weights and fine-tuning experiments, free forever.">
     <meta property="og:image" content="logo/DPL_Logo.png">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -81,22 +80,57 @@
                     <!-- Badges earned on Civitai. Pointing at one, or tabbing to it, names it below the row. -->
                     <div class="hero-badges" data-load style="--d:520ms">
                         <ul class="badge-row" aria-label="Badges earned on Civitai">
-                            <li class="badge" tabindex="0" data-name="Founding Knight" data-note="Founding member of the Knights of New Order"><img src="badges/founding-knight.webp" alt="Founding Knight: Founding member of the Knights of New Order" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Top 8 XL Creator" data-note="A top-eight place among XL creators"><img src="badges/top-8-xl-creator.webp" alt="Top 8 XL Creator: A top-eight place among XL creators" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Beacon" data-note="40,000 creator score"><img src="badges/beacon.webp" alt="Beacon: 40,000 creator score" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Blaze" data-note="10,000 creator score"><img src="badges/blaze.webp" alt="Blaze: 10,000 creator score" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Flame" data-note="5,000 creator score"><img src="badges/flame.webp" alt="Flame: 5,000 creator score" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Kindle" data-note="1,000 creator score"><img src="badges/kindle.webp" alt="Kindle: 1,000 creator score" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="Spark" data-note="500 creator score"><img src="badges/spark.webp" alt="Spark: 500 creator score" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="10k Downloads" data-note="10,000 downloads"><img src="badges/10k-downloads.webp?v=2" alt="10k Downloads: 10,000 downloads" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="1k Downloads" data-note="1,000 downloads"><img src="badges/1k-downloads.webp?v=2" alt="1k Downloads: 1,000 downloads" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="100 Downloads" data-note="100 downloads"><img src="badges/100-downloads.webp" alt="100 Downloads: 100 downloads" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="1k Reactions" data-note="1,000 reactions"><img src="badges/1k-reactions.webp?v=2" alt="1k Reactions: 1,000 reactions" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="100 Reactions" data-note="100 reactions"><img src="badges/100-reactions.webp" alt="100 Reactions: 100 reactions" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="100 Followers" data-note="100 followers"><img src="badges/100-followers.webp?v=2" alt="100 Followers: 100 followers" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="25 Models" data-note="25 models published"><img src="badges/25-models.webp?v=2" alt="25 Models: 25 models published" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="5 Models" data-note="5 models published"><img src="badges/5-models.webp?v=2" alt="5 Models: 5 models published" width="36" height="36" decoding="async"></li>
-                            <li class="badge" tabindex="0" data-name="First Model" data-note="The first model published"><img src="badges/first-model.webp" alt="First Model: The first model published" width="36" height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Founding Knight" img
+                                src="badges/founding-knight.webp"
+                                alt="Founding Knight: Founding member of the Knights of New Order" width="36"
+                                height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Top 8 XL Creator"
+                                data-note="A top-eight place among XL creators"><img src="badges/top-8-xl-creator.webp"
+                                    alt="Top 8 XL Creator: A top-eight place among XL creators" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Beacon" data-note="40,000 creator score"><img
+                                    src="badges/beacon.webp" alt="Beacon: 40,000 creator score" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Blaze" data-note="10,000 creator score"><img
+                                    src="badges/blaze.webp" alt="Blaze: 10,000 creator score" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Flame" data-note="5,000 creator score"><img
+                                    src="badges/flame.webp" alt="Flame: 5,000 creator score" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Kindle" data-note="1,000 creator score"><img
+                                    src="badges/kindle.webp" alt="Kindle: 1,000 creator score" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="Spark" data-note="500 creator score"><img
+                                    src="badges/spark.webp" alt="Spark: 500 creator score" width="36" height="36"
+                                    decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="10k Downloads" data-note="10,000 downloads"><img
+                                    src="badges/10k-downloads.webp?v=2" alt="10k Downloads: 10,000 downloads" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="1k Downloads" data-note="1,000 downloads"><img
+                                    src="badges/1k-downloads.webp?v=2" alt="1k Downloads: 1,000 downloads" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Downloads" data-note="100 downloads"><img
+                                    src="badges/100-downloads.webp" alt="100 Downloads: 100 downloads" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="1k Reactions" data-note="1,000 reactions"><img
+                                    src="badges/1k-reactions.webp?v=2" alt="1k Reactions: 1,000 reactions" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Reactions" data-note="100 reactions"><img
+                                    src="badges/100-reactions.webp" alt="100 Reactions: 100 reactions" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="100 Followers" data-note="100 followers"><img
+                                    src="badges/100-followers.webp?v=2" alt="100 Followers: 100 followers" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="25 Models" data-note="25 models published"><img
+                                    src="badges/25-models.webp?v=2" alt="25 Models: 25 models published" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="5 Models" data-note="5 models published"><img
+                                    src="badges/5-models.webp?v=2" alt="5 Models: 5 models published" width="36"
+                                    height="36" decoding="async"></li>
+                            <li class="badge" tabindex="0" data-name="First Model"
+                                data-note="The first model published"><img src="badges/first-model.webp"
+                                    alt="First Model: The first model published" width="36" height="36"
+                                    decoding="async"></li>
                         </ul>
                         <p class="badge-readout" id="badge-readout" aria-hidden="true">Badges earned on Civitai</p>
                     </div>
@@ -141,9 +175,8 @@
                                 <circle cx="11" cy="11" r="7"></circle>
                                 <path d="m20 20-3.5-3.5"></path>
                             </svg>
-                            <input id="search-input" type="search"
-                                placeholder="Search names, subjects, base models" autocomplete="off"
-                                spellcheck="false" aria-describedby="search-hint">
+                            <input id="search-input" type="search" placeholder="Search names, subjects, base models"
+                                autocomplete="off" spellcheck="false" aria-describedby="search-hint">
                             <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
@@ -169,8 +202,7 @@
                             <div class="chip-list"></div>
                         </div>
 
-                        <div class="filter-group" id="category-filters" role="group"
-                            aria-labelledby="category-label">
+                        <div class="filter-group" id="category-filters" role="group" aria-labelledby="category-label">
                             <span class="filter-label" id="category-label">Subject</span>
                             <div class="chip-list"></div>
                         </div>
@@ -231,7 +263,8 @@
                     <p class="contact-note">Write to me about a model you would like trained, a collaboration, or
                         what you have made with these weights.</p>
                     <a href="mailto:iamsamarth@gmail.com">iamsamarth@gmail.com</a>
-                    <a href="https://www.linkedin.com/in/samredjunior" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.linkedin.com/in/samredjunior" target="_blank"
+                        rel="noopener noreferrer">LinkedIn</a>
                     <p class="muted">Also on <a href="https://github.com/calluxpore" target="_blank"
                             rel="noopener noreferrer">GitHub</a> and <a href="https://huggingface.co/samredjr"
                             target="_blank" rel="noopener noreferrer">Hugging Face</a>.</p>
