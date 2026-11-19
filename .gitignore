@@ -1,2 +1,5 @@
 # Working files from the design-taste-frontend skill (screenshots, direction sheet)
 .taste-skill/
+
+# Temporary backups and source frames created by upscale_all.py
+.upscale_cache/
