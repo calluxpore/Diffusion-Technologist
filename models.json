@@ -180,6 +180,16 @@
     ]
   },
   {
+    "name": "Cel Shading",
+    "slug": "Cel Shading",
+    "category": "Art Styles & Techniques",
+    "type": "style",
+    "civitaiUrl": "https://civitai.com/models/3057500/cel-shading",
+    "tags": [
+      "SDXL"
+    ]
+  },
+  {
     "name": "Clay Model",
     "slug": "Clay Model",
     "category": "Art Styles & Techniques",
