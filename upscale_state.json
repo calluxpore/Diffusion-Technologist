@@ -350,12 +350,6 @@
     "attempts": 1,
     "error": null
   },
-  "Clown": {
-    "slug": "Clown",
-    "name": "Clown",
-    "status": "quota_blocked",
-    "error": "Failed to generate upscaled image because generate_image returned a 429 RESOURCE_EXHAUSTED (QUOTA_EXHAUSTED) error on model gemini-3.1-flash-image: \"You have exhausted your capacity on this model. Your quota will reset after 4h57m48s.\" (quotaResetTimeStamp: 2026-11-19T18:06:00Z). Did not retry per quota error instructions."
-  },
   "Color X Fashion": {
     "slug": "Color X Fashion",
     "name": "Color X Fashion",
