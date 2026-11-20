@@ -22,7 +22,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=21">
+    <link rel="stylesheet" href="styles.css?v=22">
 
     <script>
         // Applied before first paint so the page never flashes the wrong theme.
@@ -34,6 +34,12 @@
             try { saved = localStorage.getItem('theme'); } catch (e) { }
             var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
             root.setAttribute('data-theme', dark ? 'dark' : 'light');
+            var media = null;
+            try { media = localStorage.getItem('mediaMode'); } catch (e) { }
+            if (media !== 'videos' && media !== 'images') {
+                media = (navigator.connection && navigator.connection.saveData) ? 'images' : 'videos';
+            }
+            root.setAttribute('data-media', media);
         })();
     </script>
 </head>
@@ -135,6 +141,13 @@
                     </div>
                 </div>
                 <div class="hero-actions" data-load style="--d:460ms">
+                    <div class="media-toggle" id="media-toggle" role="group" aria-labelledby="media-toggle-label">
+                        <span class="media-toggle-label" id="media-toggle-label">Previews</span>
+                        <div class="media-toggle-track">
+                            <button class="media-option" type="button" data-mode="videos" aria-pressed="true">Videos</button>
+                            <button class="media-option" type="button" data-mode="images" aria-pressed="false">Images</button>
+                        </div>
+                    </div>
                     <a class="button" href="#archive">Browse the archive</a>
                     <a class="text-link" href="https://civitai.com/user/callux" target="_blank"
                         rel="noopener noreferrer">Civitai profile</a>
@@ -291,7 +304,7 @@
         </svg>
     </button>
 
-    <script src="main.js?v=23" defer></script>
+    <script src="main.js?v=24" defer></script>
 </body>
 
 </html>

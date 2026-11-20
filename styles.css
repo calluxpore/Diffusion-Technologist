@@ -448,9 +448,62 @@ p {
 .hero-actions {
     grid-column: 8 / 13;
     justify-self: end;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto;
     align-items: center;
-    gap: 28px;
+    gap: 14px 28px;
+}
+
+.media-toggle {
+    grid-column: 1 / -1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-small);
+}
+
+.media-toggle-label {
+    color: var(--field-muted);
+}
+
+.media-toggle-track {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: var(--radius);
+    background: #1a1917;
+    border: 1px solid rgba(222, 218, 211, 0.14);
+}
+
+.media-option {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: calc(var(--radius) - 3px);
+    color: var(--field-muted);
+    letter-spacing: 0.01em;
+    transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
+}
+
+.media-option:hover {
+    color: var(--field-ink);
+}
+
+.media-option:active {
+    transform: scale(0.97);
+}
+
+:root[data-media="videos"] .media-option[data-mode="videos"],
+:root[data-media="images"] .media-option[data-mode="images"],
+:root:not([data-media]) .media-option[aria-pressed="true"] {
+    background: var(--field-ink);
+    color: var(--field);
+}
+
+.media-option:focus-visible {
+    outline-color: var(--field-ink);
+    outline-offset: 2px;
 }
 
 .hero .text-link {
@@ -1494,7 +1547,12 @@ p {
     }
 
     .hero-actions {
-        gap: 20px;
+        gap: 14px 20px;
+    }
+
+    .media-option {
+        min-height: 40px;
+        padding: 0 14px;
     }
 
     .strip {

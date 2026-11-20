@@ -151,7 +151,8 @@ const el = {
     preview: document.getElementById('preview'),
     heroCount: document.getElementById('hero-count'),
     heroBases: document.getElementById('hero-bases'),
-    badgeReadout: document.getElementById('badge-readout')
+    badgeReadout: document.getElementById('badge-readout'),
+    mediaToggle: document.getElementById('media-toggle')
 };
 
 /* --------------------------------------------------------------------------
@@ -224,10 +225,12 @@ const videoPath = model => `media/${encodeURIComponent(model.slug)}.mp4`;
    is wanted. Data saver and reduced motion keep to posters unless asked.
    -------------------------------------------------------------------------- */
 
-const canAutoplay = () => !saveData && !prefersReducedMotion.matches;
+let mediaMode = 'videos';
+const videosEnabled = () => mediaMode === 'videos';
+const canAutoplay = () => videosEnabled() && !prefersReducedMotion.matches;
 
 function startVideo(video) {
-    if (video.dataset.failed === 'true') return;
+    if (!videosEnabled() || !video || video.dataset.failed === 'true') return;
     video.dataset.wanted = 'true';
     if (!video.src && video.dataset.src) {
         video.src = video.dataset.src;
@@ -236,9 +239,20 @@ function startVideo(video) {
 }
 
 function stopVideo(video) {
+    if (!video) return;
     video.dataset.wanted = 'false';
     video.classList.remove('is-playing');
     if (!video.paused) video.pause();
+}
+
+function unloadVideo(video) {
+    if (!video) return;
+    stopVideo(video);
+    if (video.hasAttribute('src')) {
+        video.removeAttribute('src');
+        video.load();
+    }
+    video.dataset.failed = 'false';
 }
 
 function playVideo(video) {
@@ -272,6 +286,7 @@ function createVideo(src, poster) {
 
     video.addEventListener('loadeddata', () => playVideo(video));
     video.addEventListener('error', () => {
+        if (!video.getAttribute('src')) return;
         // A shared preview video is reused for other models, so it is only
         // marked as failed for the source that failed.
         video.dataset.failed = 'true';
@@ -488,11 +503,14 @@ function buildStrip(models) {
     pauseStripOffscreen();
 }
 
+let stripVisible = true;
+
 /** Nobody is watching the lit frame once the hero has scrolled away, so stop decoding it. */
 function pauseStripOffscreen() {
     if (!('IntersectionObserver' in window)) return;
     let hidden = false;
     new IntersectionObserver(([entry]) => {
+        stripVisible = entry.isIntersecting;
         if (!centreFrame) return;
         const video = centreFrame.querySelector('video');
         if (!entry.isIntersecting) {
@@ -698,7 +716,7 @@ function select(model, frame, play) {
             preview.link.hidden = true;
         }
     }
-    if (play && !saveData) startVideo(preview.video);
+    if (play && videosEnabled()) startVideo(preview.video);
 }
 
 function createFrame(model, index) {
@@ -1324,6 +1342,45 @@ function initTheme() {
     });
 }
 
+function initMediaMode() {
+    const attr = document.documentElement.getAttribute('data-media');
+    const initial = (attr === 'videos' || attr === 'images') ? attr : (saveData ? 'images' : 'videos');
+
+    const apply = (mode, { persist = false } = {}) => {
+        mediaMode = mode;
+        document.documentElement.setAttribute('data-media', mode);
+
+        if (el.mediaToggle) {
+            el.mediaToggle.querySelectorAll('.media-option').forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.dataset.mode === mode));
+            });
+        }
+
+        if (persist) {
+            try { localStorage.setItem('mediaMode', mode); } catch (error) { /* private mode */ }
+        }
+
+        if (mode === 'images') {
+            clearTimeout(centreTimer);
+            document.querySelectorAll('video').forEach(unloadVideo);
+        } else if (centreFrame && stripVisible && canAutoplay()) {
+            startVideo(centreFrame.querySelector('video'));
+        }
+    };
+
+    apply(initial);
+
+    if (!el.mediaToggle) return;
+    el.mediaToggle.addEventListener('click', event => {
+        const btn = event.target.closest('.media-option');
+        if (!btn) return;
+        const mode = btn.dataset.mode;
+        if ((mode === 'videos' || mode === 'images') && mode !== mediaMode) {
+            apply(mode, { persist: true });
+        }
+    });
+}
+
 /** Keep --toolbar-h in sync so anchors and the sticky preview clear the toolbar. */
 function trackToolbarHeight() {
     if (!el.toolbar) return;
@@ -1398,6 +1455,7 @@ function showError(message) {
 
 async function init() {
     initTheme();
+    initMediaMode();
     initBadges();
     pageScroll.init();
     initScrollChrome();
