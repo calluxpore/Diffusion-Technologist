@@ -838,5 +838,15 @@
     "tags": [
       "Flux"
     ]
+  },
+  {
+    "name": "Yakshagana",
+    "slug": "Yakshagana",
+    "category": "Fashion",
+    "type": "concept",
+    "civitaiUrl": "https://civitai.com/models/3059815/yakshagana?modelVersionId=3481966",
+    "tags": [
+      "SDXL"
+    ]
   }
 ]

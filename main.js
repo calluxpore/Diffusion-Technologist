@@ -17,6 +17,7 @@ const FAVOURITES = 'My Favourites';
    Names must match models.json; anything missing is skipped silently so the
    run never breaks the page. */
 const RECENT_MODELS = [
+    'Yakshagana',
     'Cel Shading',
     'Horns',
     'Clay Model',
@@ -24,8 +25,7 @@ const RECENT_MODELS = [
     'Meta Brown',
     'Old Me',
     'Temporal Shift',
-    'Face Tattoos',
-    'Industrial Design Anima Style Rendering'
+    'Face Tattoos'
 ];
 
 /* Curated favourites, offered as a filter in the archive. Names must match models.json. */
